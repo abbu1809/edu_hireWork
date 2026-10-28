@@ -1,0 +1,31 @@
+# EduHire Bridge
+
+> EduHire Bridge is an Indian faculty-hiring platform that connects coaching institutes, schools and junior colleges with KYC-verified teachers for IIT-JEE, NEET, Foundation/Olympiad and K-12 (CBSE/ICSE/State board) roles.
+
+## What it does
+- Institutes post teaching vacancies (subject, classes/exams, board, salary, city, urgency) and track applicants in an ATS pipeline: Applied → Under Review → Shortlisted → Interview/Demo → Selected/Rejected.
+- Teachers create a profile, upload a resume, ID proof and degree certificates, and apply to vacancies for free.
+- Institutes schedule whiteboard demo lectures (date, time, topic, meeting link) with shortlisted applicants.
+- Teacher phone numbers, emails and resumes are masked until an institute pays a one-time fee (default ₹499, via Razorpay) to unlock that profile.
+- An admin team verifies teacher and institute documents and awards a Verified badge, usually within 24–48 hours.
+
+## Key facts
+- Free for teachers. Institutes pay only to unlock a teacher's direct contact and resume.
+- Coverage: all of India; most activity in Kota, Delhi NCR, Bangalore and Hyderabad.
+- Subjects: Physics, Chemistry, Mathematics, Biology, English, Social Science and more.
+
+## Public pages
+- Home: https://eduhirebridge.in/
+- Teaching jobs (filter by subject, level, city, urgency): https://eduhirebridge.in/careers
+- Vacancy detail: https://eduhirebridge.in/careers/{id}
+- Verified faculty directory: https://eduhirebridge.in/faculty
+- Faculty profile: https://eduhirebridge.in/faculty/{id}
+- Partner institutes: https://eduhirebridge.in/institutes
+- Articles & career guides: https://eduhirebridge.in/content-hub (streams: /teacher-updates, /institute-updates, /blog; article: /blog/{slug})
+- About & FAQs: https://eduhirebridge.in/about
+- Contact: https://eduhirebridge.in/contact
+
+## Policies
+- Privacy: https://eduhirebridge.in/privacy
+- Terms: https://eduhirebridge.in/terms
+- Disclaimer: https://eduhirebridge.in/disclaimer

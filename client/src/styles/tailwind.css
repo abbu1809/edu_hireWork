@@ -1,0 +1,3 @@
+/* Tailwind utilities only (preflight is off so the original design system in index.css stays untouched). */
+@tailwind components;
+@tailwind utilities;

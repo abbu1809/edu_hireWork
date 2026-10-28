@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#172554"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="80" y="80" width="1040" height="470" rx="24" fill="#ffffff" fill-opacity="0.04" stroke="#60a5fa" stroke-opacity="0.3" stroke-width="2"/>
+  <text x="140" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="700" fill="#60a5fa" letter-spacing="2">?? EDUHIRE BRIDGE</text>
+  <text x="140" y="270" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="800" fill="#ffffff">JEE, NEET &amp; School Faculty Hiring</text>
+  <text x="140" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="500" fill="#cbd5e1">Kota &bull; Delhi NCR &bull; Bangalore &bull; Nationwide</text>
+  <text x="140" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="400" fill="#94a3b8">Connecting Top Coaching Institutes with 100% KYC Verified Educators</text>
+</svg>

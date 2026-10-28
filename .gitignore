@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+.pnp
+.pnp.js
+
+# Environment variables & secrets (CRITICAL: NEVER COMMIT SECRETS)
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+client/.env
+client/.env.*
+server/.env
+server/.env.*
+
+# Production build output
+dist/
+client/dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Keep the documented templates
+!.env.example
+!server/.env.example
+!client/.env.example

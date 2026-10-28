@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+# Private portals and account flows ($ = exact match, so /teacher-updates and
+# /institute-updates / /institutes stay crawlable)
+Disallow: /teacher$
+Disallow: /teacher/
+Disallow: /institute$
+Disallow: /institute/
+Disallow: /admin
+Disallow: /auth
+Disallow: /notifications
+Disallow: /unsubscribe
+Disallow: /api/
+
+Sitemap: https://eduhirebridge.in/sitemap.xml
