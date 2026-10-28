@@ -5,6 +5,7 @@ import { decodeJwtPayload } from "../utils/crypto.js";
 import { setRefreshCookie, clearRefreshCookie, readRefreshToken } from "../utils/cookies.js";
 import { AuthService } from "../services/auth.service.js";
 import { SessionService } from "../services/session.service.js";
+import { EmailService } from "../services/email/email.service.js";
 import { serviceDb } from "../config/supabase.js";
 
 const assertPassword = (password) => {
@@ -57,6 +58,19 @@ export const AuthController = {
     assertPassword(password);
     const result = await AuthService.login({ email, password });
     const session = await issueSession(req, res, result.session);
+
+    // Send login alert notification email in background
+    if (result.user?.email) {
+      EmailService.background(
+        EmailService.send(result.user.email, "loginAlert", {
+          name: result.user.name,
+          time: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+          ip: req.ip,
+          userAgent: req.get("user-agent"),
+        })
+      );
+    }
+
     res.json({ success: true, data: { ...result, session } });
   }),
 
@@ -67,6 +81,19 @@ export const AuthController = {
     // Google / email-link returns carry a refresh token → start a session. Without
     // one (role picked after a password login) the existing session continues.
     const session = refreshToken ? await issueSession(req, res, result.session) : null;
+
+    // Send login notification when signing in to an existing account via Google (new accounts receive the welcome email)
+    if (!result.created && result.user?.email) {
+      EmailService.background(
+        EmailService.send(result.user.email, "loginAlert", {
+          name: result.user.name,
+          time: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+          ip: req.ip,
+          userAgent: req.get("user-agent"),
+        })
+      );
+    }
+
     res.json({ success: true, data: { ...result, session } });
   }),
 

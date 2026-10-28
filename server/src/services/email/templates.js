@@ -143,6 +143,28 @@ export const templates = {
     return { subject, html, text };
   },
 
+  loginAlert: ({ name, time, ip, userAgent }) => {
+    const subject = `Security Alert: Successful sign-in to your EduHire account`;
+    const formattedTime = time || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+    const html = layout({
+      preheader: `A new sign-in was detected on your EduHire account.`,
+      heading: `New sign-in detected`,
+      body: `
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:${BRAND.text};">Hello ${escapeHtml(firstName(name))},</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:${BRAND.text};">We noticed a successful login to your EduHire account on <strong>${escapeHtml(formattedTime)}</strong>.</p>
+        ${detailsTable([
+          ["Time", formattedTime],
+          ["Device", userAgent ? escapeHtml(userAgent.substring(0, 80)) : "Web Browser"],
+          ["IP Address", ip || "Verified Session"],
+        ])}
+        <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.muted};">If this was you, no action is needed. If you did not sign in, please change your password immediately.</p>
+        ${button("Open My Dashboard", appUrl("/"))}`,
+      footerNote: "You received this security notice because your account was accessed.",
+    });
+    const text = `Hello ${firstName(name)},\n\nA successful login to your EduHire account was detected at ${formattedTime}.\n\nIf this was not you, please secure your account immediately.\n\n${textFooter()}`;
+    return { subject, html, text };
+  },
+
   subscribeConfirm: ({ name, unsubscribeUrl }) => {
     const subject = "You're subscribed to EduHire Bridge updates";
     const html = layout({
