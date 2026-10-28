@@ -13,6 +13,7 @@ const assertPassword = (password) => {
   }
 };
 
+
 /**
  * Native / API clients that can't hold cookies send `X-Auth-Mode: token` and
  * receive the refresh token in the body. Browsers never see it outside the
