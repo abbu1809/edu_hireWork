@@ -51,7 +51,7 @@ export default function AuthPage({ forcedMode }) {
   const [verifying, setVerifying] = useState(false);
   const { data: authConfig } = useQuery({ queryKey: ["auth", "config"], queryFn: authApi.config, staleTime: 10 * 60 * 1000 });
 
-  // Reset loading states when returning via browser Back button (bfcache), switching back to window, or closing popup
+  // Reset loading states when returning via browser Back button (bfcache) or switching tabs
   useEffect(() => {
     const handleReset = () => {
       setBusy(false);
@@ -63,25 +63,15 @@ export default function AuthPage({ forcedMode }) {
         setGoogleBusy(false);
       }
     };
-    const handleMessage = (e) => {
-      if (e.origin !== window.location.origin) return;
-      if (e.data?.type === "oauth_success") {
-        setGoogleBusy(false);
-        const user = e.data.user;
-        navigate(homePathForRole(user?.role), { replace: true });
-      }
-    };
     window.addEventListener("pageshow", handleReset);
     window.addEventListener("focus", handleReset);
-    window.addEventListener("message", handleMessage);
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       window.removeEventListener("pageshow", handleReset);
       window.removeEventListener("focus", handleReset);
-      window.removeEventListener("message", handleMessage);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [navigate]);
+  }, []);
 
   // Tokens in the URL hash: a password-recovery link, or an email-confirmation / OAuth return.
   useEffect(() => {
@@ -233,29 +223,8 @@ export default function AuthPage({ forcedMode }) {
       const result = await authApi.googleUrl({ role, intent: authMode });
       if (!result?.url) throw new Error("Google sign-in URL was not returned by the server.");
 
-      // Open a centered popup window so users never lose their place or page state
-      const width = 500;
-      const height = 650;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      const popup = window.open(
-        result.url,
-        "google_auth_popup",
-        `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes`
-      );
-
-      if (popup) {
-        // Actively check if user closes the Google login window: unlocks button immediately!
-        const pollTimer = setInterval(() => {
-          if (!popup || popup.closed) {
-            clearInterval(pollTimer);
-            setGoogleBusy(false);
-          }
-        }, 400);
-      } else {
-        // Fallback for browsers that block popups: redirect in same tab
-        window.location.assign(result.url);
-      }
+      // Standard full-page OAuth redirect (reliable across all browsers and devices)
+      window.location.assign(result.url);
     } catch (error) {
       notify.error(`Google sign-in error: ${getErrorMessage(error)}`);
       setGoogleBusy(false);

@@ -36,15 +36,6 @@ export default function AuthCallbackPage() {
     if (completeOAuth.fulfilled.match(result)) {
       const user = result.payload.user;
       notify.success(result.payload.created ? `Welcome ${user?.name}! Your ${user?.role?.toUpperCase()} account is ready.` : "Logged in successfully!");
-      if (window.opener && window.opener !== window) {
-        try {
-          window.opener.postMessage({ type: "oauth_success", user }, window.location.origin);
-          window.close();
-          return;
-        } catch {
-          // If cross-origin opener access fails, continue regular navigation
-        }
-      }
       navigate(homePathForRole(user?.role), { replace: true });
       return;
     }
