@@ -86,14 +86,20 @@ export function GoogleButton({ onClick, disabled, loading = false, label = "Cont
   );
 }
 
-/** Reads Supabase tokens that arrive in the URL hash after Google sign-in or an email link. */
+/** Reads Supabase tokens that arrive in the URL hash or query params after Google sign-in or an email link. */
 export const readAuthHash = () => {
-  const hash = typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : "";
-  const params = new URLSearchParams(hash);
+  if (typeof window === "undefined") return {};
+  const hash = window.location.hash.replace(/^#/, "");
+  const hashParams = new URLSearchParams(hash);
+  const searchParams = new URLSearchParams(window.location.search);
   return {
-    accessToken: params.get("access_token"),
-    refreshToken: params.get("refresh_token"),
-    type: params.get("type"),
-    error: params.get("error_description") || params.get("error"),
+    accessToken: hashParams.get("access_token") || searchParams.get("access_token"),
+    refreshToken: hashParams.get("refresh_token") || searchParams.get("refresh_token"),
+    type: hashParams.get("type") || searchParams.get("type"),
+    error:
+      hashParams.get("error_description") ||
+      hashParams.get("error") ||
+      searchParams.get("error_description") ||
+      searchParams.get("error"),
   };
 };

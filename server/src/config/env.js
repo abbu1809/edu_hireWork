@@ -35,10 +35,9 @@ export const config = {
     // Refresh-token session lifetime (absolute). Each refresh rotates the token.
     refreshTtlDays: Number(process.env.REFRESH_TOKEN_TTL_DAYS) || 30,
     cookieName: (process.env.REFRESH_COOKIE_NAME || "eh_rt").trim(),
-    // "lax" when the API is same-site with the client (same domain, subdomain or
-    // dev proxy); "none" when they are on different sites (requires HTTPS).
-    cookieSameSite: (process.env.COOKIE_SAMESITE || "lax").trim().toLowerCase(),
-    cookieSecure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === "true" : process.env.NODE_ENV === "production",
+    // "none" in production (with Secure) so cross-site requests between frontend (Vercel) and API (Render) work.
+    cookieSameSite: (process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax")).trim().toLowerCase(),
+    cookieSecure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === "true" : (process.env.NODE_ENV === "production" || (process.env.COOKIE_SAMESITE || "").toLowerCase() === "none"),
     // Optional, e.g. ".eduhirebridge.in" to share the cookie across subdomains.
     cookieDomain: (process.env.COOKIE_DOMAIN || "").trim() || undefined,
   },

@@ -1,8 +1,8 @@
 import { config } from "../config/env.js";
 
 const { session } = config;
-// Scoped to the auth routes so the refresh token is only sent where it's needed.
-const COOKIE_PATH = "/api/auth";
+// Root path so the refresh cookie is available across all API paths and sub-endpoints
+const COOKIE_PATH = "/";
 
 const baseOptions = () => ({
   httpOnly: true,

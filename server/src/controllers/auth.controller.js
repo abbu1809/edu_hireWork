@@ -15,19 +15,12 @@ const assertPassword = (password) => {
 };
 
 
-/**
- * Native / API clients that can't hold cookies send `X-Auth-Mode: token` and
- * receive the refresh token in the body. Browsers never see it outside the
- * httpOnly cookie.
- */
-const wantsTokenInBody = (req) => String(req.get("x-auth-mode") || "").toLowerCase() === "token";
-
-/** Public session shape returned to clients. */
+/** Public session shape returned to clients. Includes refreshToken as a fallback for cross-site cookie restrictions. */
 const toClientSession = (req, session) => ({
   accessToken: session.accessToken,
   expiresAt: session.accessExpiresAt,
   refreshExpiresAt: session.refreshExpiresAt,
-  ...(wantsTokenInBody(req) ? { refreshToken: session.refreshToken } : {}),
+  refreshToken: session.refreshToken,
 });
 
 /** Creates the DB session for a fresh Supabase session and sets the refresh cookie. */

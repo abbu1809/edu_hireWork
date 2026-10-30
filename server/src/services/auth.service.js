@@ -199,7 +199,11 @@ export const AuthService = {
 
     const { data, error } = await createAnonClient().auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo, skipBrowserRedirect: true },
+      options: {
+        redirectTo,
+        skipBrowserRedirect: true,
+        queryParams: { access_type: "offline", prompt: "select_account" },
+      },
     });
     if (error || !data?.url) throw ApiError.badRequest(error?.message || "Google sign-in is not available.");
     return data.url;

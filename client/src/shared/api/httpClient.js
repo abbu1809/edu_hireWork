@@ -69,7 +69,14 @@ export const clearSession = () => {
   tokenStorage.clear();
 };
 
-const callRefresh = () => axios.post(`${baseURL}/auth/refresh`, {}, { withCredentials: true });
+const callRefresh = () => {
+  const refreshToken = tokenStorage.getRefreshToken();
+  return axios.post(
+    `${baseURL}/auth/refresh`,
+    refreshToken ? { refreshToken } : {},
+    { withCredentials: true }
+  );
+};
 
 const runRefresh = async () => {
   let response;

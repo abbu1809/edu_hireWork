@@ -1,4 +1,5 @@
 import { http, unwrap } from "@/shared/api/httpClient";
+import { tokenStorage } from "@/shared/api/tokenStorage";
 
 export const authApi = {
   /** { signupOtpRequired, otpLength } — whether sign-up needs an emailed code. */
@@ -8,7 +9,7 @@ export const authApi = {
 
   register: (payload) => unwrap(http.post("/auth/register", payload)),
   login: (payload) => unwrap(http.post("/auth/login", payload)),
-  logout: () => http.post("/auth/logout"),
+  logout: (payload = {}) => http.post("/auth/logout", { refreshToken: tokenStorage.getRefreshToken(), ...payload }),
   logoutAll: () => http.post("/auth/logout-all").then((res) => res.data),
   me: () => unwrap(http.get("/auth/me")),
 

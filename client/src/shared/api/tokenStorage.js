@@ -1,35 +1,43 @@
 /**
- * Access token holder — memory only.
- *
- * The access token (short-lived Supabase JWT) is never written to localStorage
- * or sessionStorage, so an injected script can't read a long-lived credential.
- * The refresh token lives in an httpOnly cookie set by the API; JavaScript
- * can't see it at all. On page load the app calls /auth/refresh to get a new
- * access token from that cookie.
+ * Dual token holder:
+ * - Access token: stored in memory only (short-lived Supabase JWT).
+ * - Refresh token: stored in httpOnly cookie where permitted, with a localStorage
+ *   fallback so cross-site / 3rd-party cookie blocking (Vercel client + Render API)
+ *   does not log users out on page refresh.
  */
 let accessToken = null;
 let expiresAt = null; // unix seconds
-
-// Clean up tokens written to localStorage by the previous version of the app.
-try {
-  window.localStorage.removeItem("eduhire_session");
-} catch {
-  /* storage unavailable */
-}
+const REFRESH_STORAGE_KEY = "eh_refresh_token";
 
 export const tokenStorage = {
   getAccessToken: () => accessToken,
 
   getExpiresAt: () => expiresAt,
 
-  /** Accepts the API's session shape: { accessToken, expiresAt }. */
+  getRefreshToken: () => {
+    try {
+      return localStorage.getItem(REFRESH_STORAGE_KEY) || null;
+    } catch {
+      return null;
+    }
+  },
+
+  /** Accepts the API's session shape: { accessToken, expiresAt, refreshToken }. */
   set(session) {
     accessToken = session?.accessToken || null;
     expiresAt = session?.expiresAt || null;
+    if (session?.refreshToken) {
+      try {
+        localStorage.setItem(REFRESH_STORAGE_KEY, session.refreshToken);
+      } catch {}
+    }
   },
 
   clear() {
     accessToken = null;
     expiresAt = null;
+    try {
+      localStorage.removeItem(REFRESH_STORAGE_KEY);
+    } catch {}
   },
 };
