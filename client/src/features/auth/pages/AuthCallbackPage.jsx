@@ -27,6 +27,12 @@ export default function AuthCallbackPage() {
   const [role, setRole] = useState(searchParams.get("role") === "institute" ? "institute" : "teacher");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [popupDone, setPopupDone] = useState(false);
+
+  const isPopup = typeof window !== "undefined" && (
+    window.name === "google_auth_popup" ||
+    Boolean(window.opener && window.opener !== window)
+  );
 
   const finish = async (authTokens, chosenRole) => {
     setSubmitting(true);
@@ -35,6 +41,40 @@ export default function AuthCallbackPage() {
 
     if (completeOAuth.fulfilled.match(result)) {
       const user = result.payload.user;
+      const session = result.payload.session;
+      const created = result.payload.created;
+
+      if (isPopup) {
+        const payload = { type: "oauth_success", user, session, created };
+
+        // 1. BroadcastChannel: instantly notifies main window
+        try {
+          const channel = new BroadcastChannel("eduhire-auth");
+          channel.postMessage(payload);
+          channel.close();
+        } catch {}
+
+        // 2. localStorage: cross-window fallback
+        try {
+          localStorage.setItem(
+            "eduhire_oauth_event",
+            JSON.stringify({ ...payload, ts: Date.now() })
+          );
+        } catch {}
+
+        // 3. postMessage: direct opener fallback if preserved
+        if (window.opener && !window.opener.closed) {
+          try {
+            window.opener.postMessage(payload, window.location.origin);
+          } catch {}
+        }
+
+        // Close popup window immediately
+        window.close();
+        setPopupDone(true);
+        return;
+      }
+
       notify.success(result.payload.created ? `Welcome ${user?.name}! Your ${user?.role?.toUpperCase()} account is ready.` : "Logged in successfully!");
       navigate(homePathForRole(user?.role), { replace: true });
       return;
@@ -73,6 +113,24 @@ export default function AuthCallbackPage() {
     finish(authTokens, searchParams.get("role") || undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (popupDone) {
+    return (
+      <div className="hero-warm-canvas" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+        <div className="card" style={{ maxWidth: "400px", width: "100%", textAlign: "center", padding: "2rem" }}>
+          <h2 className="serif-headline" style={{ fontSize: "1.3rem", color: "var(--color-brand-house)", marginBottom: "0.5rem" }}>
+            Signed In Successfully!
+          </h2>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "1.25rem", fontSize: "0.92rem" }}>
+            You are now logged in on the main window. You can close this popup.
+          </p>
+          <button className="btn btn-primary" onClick={() => window.close()}>
+            Close Window
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
