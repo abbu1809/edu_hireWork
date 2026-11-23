@@ -1,5 +1,4 @@
 import { http, unwrap } from "@/shared/api/httpClient";
-import { tokenStorage } from "@/shared/api/tokenStorage";
 
 export const authApi = {
   /** { signupOtpRequired, otpLength } — whether sign-up needs an emailed code. */
@@ -9,7 +8,7 @@ export const authApi = {
 
   register: (payload) => unwrap(http.post("/auth/register", payload)),
   login: (payload) => unwrap(http.post("/auth/login", payload)),
-  logout: (payload = {}) => http.post("/auth/logout", { refreshToken: tokenStorage.getRefreshToken(), ...payload }),
+  logout: (payload = {}) => http.post("/auth/logout", payload),
   logoutAll: () => http.post("/auth/logout-all").then((res) => res.data),
   me: () => unwrap(http.get("/auth/me")),
 
@@ -19,7 +18,17 @@ export const authApi = {
   revokeOtherSessions: () => http.delete("/auth/sessions/others").then((res) => res.data),
 
   /** Google consent URL. `role` is sent for new sign-ups so the account is created with it. */
-  googleUrl: ({ role, intent } = {}) => unwrap(http.get("/auth/google", { params: { role, intent } })),
+  googleUrl: ({ role, intent, popup } = {}) =>
+    unwrap(
+      http.get("/auth/google", {
+        params: {
+          role,
+          intent,
+          ...(popup ? { popup: "1" } : {}),
+          origin: typeof window !== "undefined" ? window.location.origin : undefined,
+        },
+      })
+    ),
   completeOAuth: (payload) => unwrap(http.post("/auth/oauth/complete", payload)),
 
   forgotPassword: (email) => http.post("/auth/forgot-password", { email }).then((res) => res.data),

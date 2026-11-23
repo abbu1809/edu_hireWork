@@ -8,6 +8,7 @@ import VacancyFormModal from "@/features/vacancies/components/VacancyFormModal";
 import { useReceivedApplications } from "../hooks/useInstitute";
 import VacanciesTable from "../components/VacanciesTable";
 import { DashboardHeader, KpiCard } from "@/shared/components/layout/DashboardLayout";
+import ProfileCompletionCard from "@/shared/components/ProfileCompletionCard";
 import EmptyState from "@/shared/components/EmptyState";
 import QueryState from "@/shared/components/QueryState";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
@@ -38,6 +39,13 @@ export default function InstituteOverviewPage() {
             </button>
           </>
         }
+      />
+
+      <ProfileCompletionCard
+        role="institute"
+        percent={currentUser?.profile_completion_percent ?? 0}
+        missingItems={currentUser?.missing_profile_items || []}
+        actionUrl="/institute/profile"
       />
 
       <div className="kpi-grid">

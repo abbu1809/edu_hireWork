@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import Modal from "@/shared/components/Modal";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useCreateVacancy, useUpdateVacancy } from "../hooks/useVacancies";
 import { notify } from "@/shared/utils/notify";
 import { SUBJECTS, URGENCY_OPTIONS } from "@/shared/constants/options";
+import { ShieldAlert, ArrowRight } from "lucide-react";
 
 const empty = (city = "") => ({
   title: "",
@@ -26,16 +29,26 @@ const fromVacancy = (v) => ({
 
 /** Create or edit a vacancy (original "Post New Teaching Vacancy" modal, plus the remaining fields). */
 export default function VacancyFormModal({ vacancy, defaultCity, onClose }) {
+  const { currentUser, role } = useAuth();
   const isEdit = Boolean(vacancy);
   const [form, setForm] = useState(() => (isEdit ? fromVacancy(vacancy) : empty(defaultCity)));
   const create = useCreateVacancy();
   const update = useUpdateVacancy();
   const saving = create.isPending || update.isPending;
 
+  const isInstitute = role === "institute";
+  const completionPercent = currentUser?.profile_completion_percent ?? 0;
+  const isBlockedByProfile = !isEdit && isInstitute && completionPercent < 75;
+
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isBlockedByProfile) {
+      return notify.error(
+        `Institute profile is only ${completionPercent}% complete. Complete at least 75% before publishing.`
+      );
+    }
     if (!form.title.trim()) return notify.error("Please enter a vacancy title.");
     if (!form.city.trim()) return notify.error("Please enter the city.");
     if (!form.salary_range.trim()) return notify.error("Please enter a salary range.");
@@ -64,6 +77,47 @@ export default function VacancyFormModal({ vacancy, defaultCity, onClose }) {
     if (isEdit) update.mutate({ id: vacancy.id, ...payload }, options);
     else create.mutate(payload, options);
   };
+
+  if (isBlockedByProfile) {
+    return (
+      <Modal title="Profile Completion Requirement" onClose={onClose}>
+        <div style={{ padding: "0.5rem 0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem", color: "#dc2626" }}>
+            <ShieldAlert size={28} />
+            <div>
+              <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "700" }}>75% Profile Completion Required</h4>
+              <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+                Current Completion: <strong>{completionPercent}%</strong>
+              </div>
+            </div>
+          </div>
+          <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", lineHeight: "1.5" }}>
+            To ensure genuine opportunities for educators, institutes must complete at least 75% of their profile details before posting new vacancies.
+          </p>
+          {currentUser?.missing_profile_items?.length > 0 && (
+            <div style={{ margin: "1rem 0", padding: "1rem", background: "var(--surface-sunken, #f8fafc)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+              <div style={{ fontSize: "0.8rem", fontWeight: "700", marginBottom: "0.5rem", color: "#b91c1c", textTransform: "uppercase" }}>
+                Missing Profile Information:
+              </div>
+              <ul style={{ margin: 0, paddingLeft: "1.2rem", fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                {currentUser.missing_profile_items.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "1.5rem" }}>
+            <button className="btn btn-outline" onClick={onClose}>
+              Cancel
+            </button>
+            <Link to="/institute/profile" className="btn btn-primary" onClick={onClose} style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
+              Complete Institute Profile <ArrowRight size={15} />
+            </Link>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal title={isEdit ? "Edit Teaching Vacancy" : "Post New Teaching Vacancy"} onClose={onClose}>

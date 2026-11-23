@@ -12,8 +12,10 @@ router.get("/stats", AdminController.stats);
 
 // Teachers & institutes (":entity" is "teachers" or "institutes")
 router.get("/teachers", AdminController.listTeachers);
+router.get("/teachers/:id", AdminController.getTeacherDetails);
 router.post("/teachers", AdminController.createTeacher);
 router.get("/institutes", AdminController.listInstitutes);
+router.get("/institutes/:id", AdminController.getInstituteDetails);
 router.post("/institutes", AdminController.createInstitute);
 router.put("/:entity(teachers|institutes)/:id", AdminController.updateEntity);
 router.post("/:entity(teachers|institutes)/:id/verify", AdminController.verifyEntity);

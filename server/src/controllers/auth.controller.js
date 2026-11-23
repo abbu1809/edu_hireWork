@@ -15,12 +15,11 @@ const assertPassword = (password) => {
 };
 
 
-/** Public session shape returned to clients. Includes refreshToken as a fallback for cross-site cookie restrictions. */
+/** Public session shape returned to clients. Refresh token is handled strictly via httpOnly cookie. */
 const toClientSession = (req, session) => ({
   accessToken: session.accessToken,
   expiresAt: session.accessExpiresAt,
   refreshExpiresAt: session.refreshExpiresAt,
-  refreshToken: session.refreshToken,
 });
 
 /** Creates the DB session for a fresh Supabase session and sets the refresh cookie. */
@@ -179,10 +178,18 @@ export const AuthController = {
   }),
 
   googleUrl: asyncHandler(async (req, res) => {
+    let refererOrigin = "";
+    try {
+      if (req.get("referer")) refererOrigin = new URL(req.get("referer")).origin;
+    } catch {}
+    const requestOrigin = String(req.query.origin || req.get("origin") || refererOrigin || "").replace(/\/$/, "");
     const url = await AuthService.getGoogleAuthUrl({
       role: String(req.query.role || "").toLowerCase(),
       intent: req.query.intent,
+      popup: req.query.popup === "1" || req.query.popup === "true",
+      origin: requestOrigin,
     });
+    res.set("Cache-Control", "no-store");
     res.json({ success: true, data: { url } });
   }),
 

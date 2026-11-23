@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useDeleteVacancy, useMyVacancies } from "@/features/vacancies/hooks/useVacancies";
 import VacancyFormModal from "@/features/vacancies/components/VacancyFormModal";
 import VacanciesTable from "../components/VacanciesTable";
+import ProfileCompletionCard from "@/shared/components/ProfileCompletionCard";
 import { DashboardHeader } from "@/shared/components/layout/DashboardLayout";
 import EmptyState from "@/shared/components/EmptyState";
 import QueryState from "@/shared/components/QueryState";
@@ -56,6 +57,15 @@ export default function InstituteVacanciesPage() {
           </button>
         }
       />
+
+      {(currentUser?.profile_completion_percent ?? 0) < 75 && (
+        <ProfileCompletionCard
+          role="institute"
+          percent={currentUser?.profile_completion_percent ?? 0}
+          missingItems={currentUser?.missing_profile_items || []}
+          actionUrl="/institute/profile"
+        />
+      )}
 
       <QueryState query={query} loadingLabel="Loading vacancies...">
         {vacancies.length === 0 ? (

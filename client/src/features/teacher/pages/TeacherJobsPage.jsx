@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Briefcase } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useActiveVacancies } from "@/features/vacancies/hooks/useVacancies";
 import VacancyCard from "@/features/vacancies/components/VacancyCard";
 import ApplyButton from "@/features/vacancies/components/ApplyButton";
+import ProfileCompletionCard from "@/shared/components/ProfileCompletionCard";
 import { DashboardHeader } from "@/shared/components/layout/DashboardLayout";
 import EmptyState from "@/shared/components/EmptyState";
 import QueryState from "@/shared/components/QueryState";
@@ -13,14 +15,25 @@ import { autoGrid } from "@/shared/utils/format";
 
 export default function TeacherJobsPage() {
   useDocumentTitle("Explore Vacancies");
+  const { currentUser } = useAuth();
   const [jobSearch, setJobSearch] = useState("");
   const [jobSubjFilter, setJobSubjFilter] = useState("");
   const query = useActiveVacancies({ search: useDebouncedValue(jobSearch.trim()), subject: jobSubjFilter });
   const vacancies = query.data || [];
+  const completionScore = currentUser?.profile_completion_percent ?? 0;
 
   return (
     <div>
       <DashboardHeader title="Explore Teaching Vacancies" subtitle="Verified openings from accredited IIT-JEE, NEET, and CBSE coaching centers" />
+
+      {completionScore < 75 && (
+        <ProfileCompletionCard
+          role="teacher"
+          percent={completionScore}
+          missingItems={currentUser?.missing_profile_items || []}
+          actionUrl="/teacher/profile"
+        />
+      )}
 
       <div className="filter-bar" role="search">
         <div style={{ flex: 2, minWidth: "220px" }}>

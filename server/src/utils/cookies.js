@@ -4,20 +4,31 @@ const { session } = config;
 // Root path so the refresh cookie is available across all API paths and sub-endpoints
 const COOKIE_PATH = "/";
 
-const baseOptions = () => ({
-  httpOnly: true,
-  secure: session.cookieSecure || session.cookieSameSite === "none", // SameSite=None requires Secure
-  sameSite: session.cookieSameSite,
-  path: COOKIE_PATH,
-  ...(session.cookieDomain ? { domain: session.cookieDomain } : {}),
-});
+const isLocalHttp = (req) => {
+  if (!req || config.nodeEnv === "production") return false;
+  const proto = String(req.get?.("x-forwarded-proto") || req.protocol || "").toLowerCase();
+  return proto === "http";
+};
+
+const baseOptions = (req) => {
+  const localHttp = isLocalHttp(req);
+  const sameSite = localHttp ? "lax" : session.cookieSameSite;
+  const secure = localHttp ? false : session.cookieSecure || sameSite === "none"; // SameSite=None requires Secure
+  return {
+    httpOnly: true,
+    secure,
+    sameSite,
+    path: COOKIE_PATH,
+    ...(session.cookieDomain ? { domain: session.cookieDomain } : {}),
+  };
+};
 
 export const setRefreshCookie = (res, token, expiresAt) => {
-  res.cookie(session.cookieName, token, { ...baseOptions(), expires: new Date(expiresAt) });
+  res.cookie(session.cookieName, token, { ...baseOptions(res.req), expires: new Date(expiresAt) });
 };
 
 export const clearRefreshCookie = (res) => {
-  res.clearCookie(session.cookieName, baseOptions());
+  res.clearCookie(session.cookieName, baseOptions(res.req));
 };
 
 /** Minimal cookie-header parser (avoids a dependency for one cookie). */

@@ -27,3 +27,5 @@ services:
         sync: false
       - key: ADMIN_EMAIL
         sync: false
+      - key: INSTITUTE_UNLOCK_FEE
+        value: "49"

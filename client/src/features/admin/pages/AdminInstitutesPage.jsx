@@ -1,7 +1,9 @@
-import { Building, Star } from "lucide-react";
+import { useState } from "react";
+import { Building, Star, Eye, Trash2 } from "lucide-react";
 import { useAdminInstitutes } from "../hooks/useAdmin";
 import { useEntityActions } from "../hooks/useEntityActions";
 import VerificationBadge from "../components/VerificationBadge";
+import InstituteDetailsModal from "../components/InstituteDetailsModal";
 import { DashboardHeader } from "@/shared/components/layout/DashboardLayout";
 import EmptyState from "@/shared/components/EmptyState";
 import QueryState from "@/shared/components/QueryState";
@@ -12,6 +14,7 @@ export default function AdminInstitutesPage() {
   useDocumentTitle("Institutes");
   const query = useAdminInstitutes();
   const actions = useEntityActions("institutes");
+  const [selectedInstituteId, setSelectedInstituteId] = useState(null);
   const institutes = query.data || [];
 
   return (
@@ -43,7 +46,13 @@ export default function AdminInstitutesPage() {
                   return (
                     <tr key={inst.id} style={archived ? { opacity: 0.6 } : undefined}>
                       <td>
-                        <strong>{inst.institute_name}</strong>
+                        <strong
+                          onClick={() => setSelectedInstituteId(inst.id)}
+                          style={{ cursor: "pointer", color: "var(--primary-color)" }}
+                          title="Click to view details, vacancies & documents"
+                        >
+                          {inst.institute_name}
+                        </strong>
                         <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>{inst.email}</div>
                       </td>
                       <td>{inst.city || "—"}</td>
@@ -56,6 +65,14 @@ export default function AdminInstitutesPage() {
                       </td>
                       <td>
                         <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                          <button
+                            className="btn btn-outline btn-sm"
+                            title="Audit credentials & uploaded documents"
+                            onClick={() => setSelectedInstituteId(inst.id)}
+                            style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+                          >
+                            <Eye size={13} /> View
+                          </button>
                           {verified ? (
                             <button className="btn btn-outline btn-sm" disabled={actions.pending} onClick={() => actions.setVerification(inst, "Rejected", "Verification revoked by admin")}>
                               Revoke
@@ -75,6 +92,14 @@ export default function AdminInstitutesPage() {
                           <button className="btn btn-dark-outline btn-sm" disabled={actions.pending} onClick={() => actions.toggleArchive(inst, archived)}>
                             {archived ? "Restore" : "Archive"}
                           </button>
+                          <button
+                            className="btn btn-danger-outline btn-sm"
+                            disabled={actions.pending}
+                            title="Permanently delete institute account"
+                            onClick={() => actions.deleteEntity(inst)}
+                          >
+                            <Trash2 size={13} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -85,6 +110,13 @@ export default function AdminInstitutesPage() {
           </div>
         )}
       </QueryState>
+
+      {selectedInstituteId && (
+        <InstituteDetailsModal
+          instituteId={selectedInstituteId}
+          onClose={() => setSelectedInstituteId(null)}
+        />
+      )}
     </div>
   );
 }

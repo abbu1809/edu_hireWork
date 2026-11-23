@@ -30,9 +30,44 @@ export default function AuthCallbackPage() {
   const [popupDone, setPopupDone] = useState(false);
 
   const isPopup = typeof window !== "undefined" && (
+    searchParams.get("popup") === "1" ||
     window.name === "google_auth_popup" ||
     Boolean(window.opener && window.opener !== window)
   );
+
+  const notifyParentAndClose = (payload) => {
+    let channel = null;
+    // 1. BroadcastChannel: in-memory same-origin IPC (works even after COOP severs window.opener)
+    try {
+      if (typeof BroadcastChannel !== "undefined") {
+        channel = new BroadcastChannel("eduhire-auth");
+        channel.postMessage(payload);
+      }
+    } catch {}
+
+    // 2. postMessage: direct opener fallback if preserved
+    try {
+      if (window.opener && window.opener !== window) {
+        window.opener.postMessage(payload, window.location.origin);
+      }
+    } catch {}
+
+    // 3. Token-free storage ping: nudges main window to restore session via httpOnly cookie
+    if (payload.type === "oauth_success") {
+      try {
+        localStorage.setItem("eduhire_oauth_ping", String(Date.now()));
+      } catch {}
+    }
+
+    setPopupDone(true);
+    // Delay close slightly so BroadcastChannel finishes delivering before the context tears down.
+    setTimeout(() => {
+      try {
+        channel?.close();
+      } catch {}
+      window.close();
+    }, 150);
+  };
 
   const finish = async (authTokens, chosenRole) => {
     setSubmitting(true);
@@ -45,37 +80,11 @@ export default function AuthCallbackPage() {
       const created = result.payload.created;
 
       if (isPopup) {
-        const payload = { type: "oauth_success", user, session, created };
-
-        // 1. BroadcastChannel: instantly notifies main window
-        try {
-          const channel = new BroadcastChannel("eduhire-auth");
-          channel.postMessage(payload);
-          channel.close();
-        } catch {}
-
-        // 2. localStorage: cross-window fallback
-        try {
-          localStorage.setItem(
-            "eduhire_oauth_event",
-            JSON.stringify({ ...payload, ts: Date.now() })
-          );
-        } catch {}
-
-        // 3. postMessage: direct opener fallback if preserved
-        if (window.opener && !window.opener.closed) {
-          try {
-            window.opener.postMessage(payload, window.location.origin);
-          } catch {}
-        }
-
-        // Close popup window immediately
-        window.close();
-        setPopupDone(true);
+        notifyParentAndClose({ type: "oauth_success", user, session, created });
         return;
       }
 
-      notify.success(result.payload.created ? `Welcome ${user?.name}! Your ${user?.role?.toUpperCase()} account is ready.` : "Logged in successfully!");
+      notify.success(created ? `Welcome ${user?.name}! Your ${user?.role?.toUpperCase()} account is ready.` : "Logged in successfully!");
       navigate(homePathForRole(user?.role), { replace: true });
       return;
     }
@@ -83,7 +92,15 @@ export default function AuthCallbackPage() {
       setNeedsRole({ email: result.payload.details.email, name: result.payload.details.name });
       return;
     }
-    setError(result.payload?.message || "Sign-in could not be completed.");
+    const errMsg = result.payload?.message || "Sign-in could not be completed.";
+    setError(errMsg);
+    if (isPopup) {
+      try {
+        const channel = new BroadcastChannel("eduhire-auth");
+        channel.postMessage({ type: "oauth_error", message: errMsg });
+        setTimeout(() => channel.close(), 150);
+      } catch {}
+    }
   };
 
   useEffect(() => {

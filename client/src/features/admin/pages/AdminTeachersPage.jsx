@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { Users, Flag, Star } from "lucide-react";
+import { Users, Flag, Star, Eye, Trash2 } from "lucide-react";
 import { useAdminTeachers } from "../hooks/useAdmin";
 import { useEntityActions } from "../hooks/useEntityActions";
 import VerificationBadge from "../components/VerificationBadge";
+import TeacherDetailsModal from "../components/TeacherDetailsModal";
 import { DashboardHeader } from "@/shared/components/layout/DashboardLayout";
 import EmptyState from "@/shared/components/EmptyState";
 import QueryState from "@/shared/components/QueryState";
@@ -23,6 +24,7 @@ export default function AdminTeachersPage() {
   const actions = useEntityActions("teachers");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [selectedTeacherId, setSelectedTeacherId] = useState(null);
 
   const teachers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -79,10 +81,12 @@ export default function AdminTeachersPage() {
                     <tr key={t.id} style={archived ? { opacity: 0.6 } : undefined}>
                       <td>
                         <div>
-                          <strong>
-                            <Link to={`/faculty/${t.id}`} style={{ color: "inherit" }}>
-                              {t.name}
-                            </Link>
+                          <strong
+                            onClick={() => setSelectedTeacherId(t.id)}
+                            style={{ cursor: "pointer", color: "var(--primary-color)" }}
+                            title="Click to view details & documents"
+                          >
+                            {t.name}
                           </strong>
                           <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>{t.email}</div>
                           {t.flagged && <span className="badge badge-rejected" style={{ marginTop: "0.25rem" }}><Flag size={12} aria-hidden="true" /> Flagged</span>}
@@ -105,6 +109,14 @@ export default function AdminTeachersPage() {
                       </td>
                       <td>
                         <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                          <button
+                            className="btn btn-outline btn-sm"
+                            title="Audit credentials & uploaded documents"
+                            onClick={() => setSelectedTeacherId(t.id)}
+                            style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+                          >
+                            <Eye size={13} /> View
+                          </button>
                           {!verified ? (
                             <>
                               <button className="btn btn-primary btn-sm" disabled={actions.pending} onClick={() => actions.setVerification(t, "Verified")}>
@@ -124,6 +136,14 @@ export default function AdminTeachersPage() {
                           <button className="btn btn-dark-outline btn-sm" disabled={actions.pending} onClick={() => actions.toggleArchive(t, archived)}>
                             {archived ? "Restore" : "Archive"}
                           </button>
+                          <button
+                            className="btn btn-danger-outline btn-sm"
+                            disabled={actions.pending}
+                            title="Permanently delete teacher account"
+                            onClick={() => actions.deleteEntity(t)}
+                          >
+                            <Trash2 size={13} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -134,6 +154,13 @@ export default function AdminTeachersPage() {
           </div>
         )}
       </QueryState>
+
+      {selectedTeacherId && (
+        <TeacherDetailsModal
+          teacherId={selectedTeacherId}
+          onClose={() => setSelectedTeacherId(null)}
+        />
+      )}
     </div>
   );
 }

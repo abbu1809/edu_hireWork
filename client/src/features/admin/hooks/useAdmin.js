@@ -25,9 +25,22 @@ const useAdminMutation = (mutationFn, extraKeys = []) => {
   });
 };
 
-export const useVerifyEntity = () => useAdminMutation(adminApi.verify, [["teachers"], ["public"]]);
-export const useFeatureEntity = () => useAdminMutation(adminApi.feature, [["teachers"], ["public"]]);
-export const useArchiveEntity = () => useAdminMutation(adminApi.archive, [["teachers"], ["public"]]);
+export const useVerifyEntity = () => useAdminMutation(adminApi.verify, [["teachers"], ["institutes"], ["public"]]);
+export const useFeatureEntity = () => useAdminMutation(adminApi.feature, [["teachers"], ["institutes"], ["public"]]);
+export const useArchiveEntity = () => useAdminMutation(adminApi.archive, [["teachers"], ["institutes"], ["public"]]);
+export const useDeleteEntity = () => useAdminMutation(adminApi.deleteEntity, [["teachers"], ["institutes"], ["public"]]);
+export const useTeacherDetails = (id) =>
+  useQuery({
+    queryKey: ["admin", "teachers", id],
+    queryFn: () => adminApi.getTeacher(id),
+    enabled: Boolean(id),
+  });
+export const useInstituteDetails = (id) =>
+  useQuery({
+    queryKey: ["admin", "institutes", id],
+    queryFn: () => adminApi.getInstitute(id),
+    enabled: Boolean(id),
+  });
 export const useMatchmake = () => useAdminMutation(adminApi.matchmake);
 export const useBroadcast = () => useAdminMutation(adminApi.broadcast);
 export const useCreatePost = () => useAdminMutation(adminApi.createPost, [["blog"]]);

@@ -94,6 +94,9 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<LoadingState />}>
       <Routes>
+        {/* Standalone callback route so OAuth popups never render the site navbar/footer */}
+        <Route path="auth/callback" element={<AuthCallbackPage />} />
+
         <Route element={<MainLayout />}>
           <Route index element={<LandingPage />} />
 
@@ -106,7 +109,6 @@ export default function AppRoutes() {
               </PublicOnlyRoute>
             }
           />
-          <Route path="auth/callback" element={<AuthCallbackPage />} />
           <Route path="auth/reset-password" element={<AuthPage forcedMode="reset_password" />} />
           <Route path="login" element={<Navigate to="/auth?mode=login" replace />} />
           <Route path="register" element={<Navigate to="/auth?mode=signup" replace />} />

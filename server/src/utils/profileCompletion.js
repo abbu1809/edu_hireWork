@@ -45,5 +45,53 @@ export const calculateProfileCompletion = (teacher) => {
   if (teacher.resume_url) score += 10;
   else missing.push("Upload resume / CV");
 
-  return { percent: Math.min(100, Math.max(15, score)), missingItems: missing };
+  return {
+    percent: Math.min(100, Math.max(15, score)),
+    missingItems: missing,
+    isComplete: score >= 75,
+  };
+};
+
+/**
+ * Scores how complete an institute profile is (0–100) and lists what is missing.
+ */
+export const calculateInstituteProfileCompletion = (institute) => {
+  if (!institute) return { percent: 0, missingItems: [], isComplete: false };
+
+  let score = 0;
+  const missing = [];
+
+  // 1. Basic Identity (30%)
+  if (institute.institute_name && institute.institute_name.trim().length > 1) score += 15;
+  else missing.push("Institute name");
+
+  if (institute.contact_person && institute.contact_person.trim().length > 1) score += 15;
+  else missing.push("Contact person name");
+
+  // 2. Contact & Location (30%)
+  if (institute.phone && institute.phone.trim().length >= 10) score += 15;
+  else missing.push("Official contact phone");
+
+  if (institute.city || institute.location || institute.state) score += 15;
+  else missing.push("Campus city / address");
+
+  // 3. Category & Description (25%)
+  if (institute.institute_type && institute.institute_type.trim().length > 1) score += 10;
+  else missing.push("Institute type (e.g. Coaching, School)");
+
+  if (institute.description && institute.description.trim().length > 15) score += 15;
+  else missing.push("About / Description (at least 15 characters)");
+
+  // 4. Online Presence & Stats (15%)
+  if (institute.website && institute.website.trim().length > 4) score += 10;
+  else missing.push("Institute website URL");
+
+  if (institute.student_count || institute.faculty_count || institute.established_year) score += 5;
+  else missing.push("Student/faculty stats or established year");
+
+  return {
+    percent: Math.min(100, Math.max(10, score)),
+    missingItems: missing,
+    isComplete: score >= 75,
+  };
 };

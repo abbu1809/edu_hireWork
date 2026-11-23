@@ -5,6 +5,7 @@ import { anonDb } from "../config/supabase.js";
 import { VacancyModel } from "../models/vacancy.model.js";
 import { InstituteModel } from "../models/institute.model.js";
 import { JobAlertService } from "../services/email/jobAlert.service.js";
+import { calculateInstituteProfileCompletion } from "../utils/profileCompletion.js";
 
 const EDITABLE_FIELDS = [
   "title",
@@ -61,6 +62,13 @@ export const VacancyController = {
     if (!payload.salary_range) throw ApiError.badRequest("Please enter a salary range.");
 
     const institute = await InstituteModel.findById(req.db, req.user.id);
+    const completion = calculateInstituteProfileCompletion(institute);
+    if (completion.percent < 75) {
+      throw ApiError.badRequest(
+        `Institute profile incomplete (${completion.percent}%). Complete at least 75% of your profile before posting vacancies. Missing: ${completion.missingItems.join(", ")}.`
+      );
+    }
+
     const vacancy = await VacancyModel.create(req.db, {
       ...payload,
       institute_id: req.user.id,

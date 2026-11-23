@@ -4,6 +4,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMyApplications, useMyInterviews } from "../hooks/useTeacher";
 import { usePublicStats } from "@/features/site/hooks/useSite";
 import ApplicationsTable from "../components/ApplicationsTable";
+import ProfileCompletionCard from "@/shared/components/ProfileCompletionCard";
 import { DashboardHeader, KpiCard } from "@/shared/components/layout/DashboardLayout";
 import EmptyState from "@/shared/components/EmptyState";
 import QueryState from "@/shared/components/QueryState";
@@ -39,28 +40,12 @@ export default function TeacherOverviewPage() {
         <KpiCard icon={ShieldCheck} label="Profile Strength" value={`${completionScore}%`} />
       </div>
 
-      {completionScore < 100 && (
-        <div className="card-gold-wash" style={{ marginBottom: "2rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", gap: "1rem", flexWrap: "wrap" }}>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: "700" }}>Complete Your Educator Profile ({completionScore}%)</h3>
-            <Link to="/teacher/profile" className="btn btn-black btn-sm">
-              Update Details
-            </Link>
-          </div>
-          <div
-            className="progress"
-            role="progressbar"
-            aria-valuenow={completionScore}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <span style={{ width: `${completionScore}%` }} />
-          </div>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginTop: "0.5rem" }}>
-            Profiles with verified degrees, experience certificates, and introductory demo links receive 4x more interview invitations.
-          </p>
-        </div>
-      )}
+      <ProfileCompletionCard
+        role="teacher"
+        percent={completionScore}
+        missingItems={currentUser?.missing_profile_items || []}
+        actionUrl="/teacher/profile"
+      />
 
       <div className="card">
         <div className="card-header">

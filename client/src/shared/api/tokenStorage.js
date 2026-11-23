@@ -1,9 +1,7 @@
 /**
- * Dual token holder:
+ * In-memory token holder:
  * - Access token: stored in memory only (short-lived Supabase JWT).
- * - Refresh token: stored in httpOnly cookie where permitted, with a localStorage
- *   fallback so cross-site / 3rd-party cookie blocking (Vercel client + Render API)
- *   does not log users out on page refresh.
+ * - Refresh token: stored strictly in secure httpOnly cookies (no localStorage).
  */
 let accessToken = null;
 let expiresAt = null; // unix seconds
@@ -14,23 +12,16 @@ export const tokenStorage = {
 
   getExpiresAt: () => expiresAt,
 
-  getRefreshToken: () => {
-    try {
-      return localStorage.getItem(REFRESH_STORAGE_KEY) || null;
-    } catch {
-      return null;
-    }
-  },
+  getRefreshToken: () => null,
 
-  /** Accepts the API's session shape: { accessToken, expiresAt, refreshToken }. */
+  /** Accepts the API's session shape: { accessToken, expiresAt }. */
   set(session) {
     accessToken = session?.accessToken || null;
     expiresAt = session?.expiresAt || null;
-    if (session?.refreshToken) {
-      try {
-        localStorage.setItem(REFRESH_STORAGE_KEY, session.refreshToken);
-      } catch {}
-    }
+    // Clear any legacy refresh tokens from localStorage
+    try {
+      localStorage.removeItem(REFRESH_STORAGE_KEY);
+    } catch {}
   },
 
   clear() {

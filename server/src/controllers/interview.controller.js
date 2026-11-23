@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { InterviewModel } from "../models/interview.model.js";
-import { ApplicationModel } from "../models/application.model.js";
+import { ApplicationModel, TERMINAL_APPLICATION_STATUSES } from "../models/application.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { EmailService } from "../services/email/email.service.js";
 
@@ -21,6 +21,9 @@ export const InterviewController = {
 
     const application = await ApplicationModel.findById(req.db, applicationId);
     if (!application || application.institute_id !== req.user.id) throw ApiError.notFound("Application not found.");
+    if (TERMINAL_APPLICATION_STATUSES.includes(application.status)) {
+      throw ApiError.badRequest("Cannot schedule a demo for a finalized application.");
+    }
 
     // The browser sends scheduledAt in ISO form so the teacher's local time is preserved.
     const scheduledAt = req.body.scheduledAt ? new Date(req.body.scheduledAt) : new Date(`${date}T${time || "00:00"}`);

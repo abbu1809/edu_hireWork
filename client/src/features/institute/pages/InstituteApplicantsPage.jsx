@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { UserCheck, Video, Calendar } from "lucide-react";
+import { UserCheck, Video, Calendar, Eye, FileText } from "lucide-react";
 import { useReceivedApplications, useScheduleInterview, useUpdateApplicationStatus } from "../hooks/useInstitute";
+import ApplicantDetailsModal from "../components/ApplicantDetailsModal";
 import { DashboardHeader } from "@/shared/components/layout/DashboardLayout";
 import EmptyState from "@/shared/components/EmptyState";
 import QueryState from "@/shared/components/QueryState";
@@ -10,7 +11,12 @@ import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { notify } from "@/shared/utils/notify";
 import { useConfirm } from "@/shared/components/ConfirmDialog";
 import { formatDate } from "@/shared/utils/format";
-import { APPLICATION_STATUS_OPTIONS } from "@/shared/constants/options";
+import {
+  APPLICATION_STATUS_OPTIONS,
+  applicationBadgeClass,
+  canTransitionApplicationStatus,
+  isTerminalApplicationStatus,
+} from "@/shared/constants/options";
 
 const today = () => new Date().toISOString().split("T")[0];
 
@@ -104,22 +110,42 @@ export default function InstituteApplicantsPage() {
   const updateStatus = useUpdateApplicationStatus();
   const confirm = useConfirm();
   const [demoFor, setDemoFor] = useState(null);
+  const [selectedApplicantId, setSelectedApplicantId] = useState(null);
   const applicants = query.data || [];
+  const selectedApplicant = selectedApplicantId ? applicants.find((a) => a.id === selectedApplicantId) || null : null;
+
+  const statusLabelOf = (value) =>
+    APPLICATION_STATUS_OPTIONS.find((o) => o.value === value)?.label || (value === "WITHDRAWN" ? "Withdrawn" : value);
 
   const handleStatusChange = async (app, status) => {
+    const currentStatus = app.status || "APPLIED";
+    if (status === currentStatus) return;
+    if (!canTransitionApplicationStatus(currentStatus, status)) {
+      notify.error("Status can only move forward and cannot be changed once finalized.");
+      return;
+    }
+
     if (status === "REJECTED") {
       const ok = await confirm({
         title: `Reject ${app.teacher_name}?`,
-        message: `They will be notified by email and in-app that their application for "${app.vacancy_title}" was not taken forward.`,
+        message: `They will be notified by email and in-app that their application for "${app.vacancy_title}" was not taken forward. This decision is final and cannot be reversed.`,
         confirmLabel: "Reject applicant",
         tone: "danger",
       });
       if (!ok) return;
+    } else if (status === "SELECTED") {
+      const ok = await confirm({
+        title: `Select ${app.teacher_name}?`,
+        message: `Mark ${app.teacher_name} as Selected for "${app.vacancy_title}"? This decision is final and cannot be reversed.`,
+        confirmLabel: "Confirm Selection",
+      });
+      if (!ok) return;
     }
+
     updateStatus.mutate(
       { id: app.id, status },
       {
-        onSuccess: () => notify.success(`Applicant status updated to ${APPLICATION_STATUS_OPTIONS.find((o) => o.value === status)?.label}.`),
+        onSuccess: () => notify.success(`Applicant status updated to ${statusLabelOf(status)}.`),
         onError: (error) => notify.apiError(error, "Failed to update status."),
       }
     );
@@ -147,55 +173,93 @@ export default function InstituteApplicantsPage() {
                 </tr>
               </thead>
               <tbody>
-                {applicants.map((app) => (
-                  <tr key={app.id}>
-                    <td>
-                      <strong>
-                        <Link to={`/faculty/${app.teacher_id}`} style={{ color: "inherit" }}>
-                          {app.teacher_name}
-                        </Link>
-                      </strong>
-                    </td>
-                    <td>{app.vacancy_title}</td>
-                    <td>{formatDate(app.applied_date || app.created_at)}</td>
-                    <td>
-                      {app.status === "WITHDRAWN" ? (
-                        <span className="badge badge-rejected">Withdrawn</span>
-                      ) : (
-                        <select
-                          className="input-select input-compact"
-                          aria-label={`Status for ${app.teacher_name}`}
-                          value={app.status || "APPLIED"}
-                          disabled={updateStatus.isPending && updateStatus.variables?.id === app.id}
-                          onChange={(e) => handleStatusChange(app, e.target.value)}
-                        >
-                          {APPLICATION_STATUS_OPTIONS.map((o) => (
-                            <option key={o.value} value={o.value}>
-                              {o.label}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    </td>
-                    <td>
-                      {app.interview_date ? (
-                        <span style={{ fontSize: "0.85rem", color: "var(--color-brand-accent)", fontWeight: 600, whiteSpace: "nowrap" }}>
-                          <Calendar size={14} aria-hidden="true" /> {formatDate(app.interview_date)}
-                          {app.interview_time ? ` · ${app.interview_time}` : ""}
-                        </span>
-                      ) : (
-                        <button className="btn btn-outline btn-sm" disabled={app.status === "WITHDRAWN" || app.status === "REJECTED"} onClick={() => setDemoFor(app)}>
-                          <Video size={14} /> Schedule Demo
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {applicants.map((app) => {
+                  const currentStatus = app.status || "APPLIED";
+                  const terminal = isTerminalApplicationStatus(currentStatus);
+                  return (
+                    <tr key={app.id}>
+                      <td>
+                        <div>
+                          <strong
+                            onClick={() => setSelectedApplicantId(app.id)}
+                            style={{ cursor: "pointer", color: "var(--primary-color)" }}
+                            title="Click to view candidate details & resume"
+                          >
+                            {app.teacher_name}
+                          </strong>
+                          {app.resume_url && (
+                            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "0.25rem", marginTop: "0.2rem" }}>
+                              <FileText size={12} /> Resume Attached
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td>{app.vacancy_title}</td>
+                      <td>{formatDate(app.applied_date || app.created_at)}</td>
+                      <td>
+                        {terminal ? (
+                          <span className={`badge ${applicationBadgeClass(currentStatus)}`} title="Final status — cannot be changed">
+                            {statusLabelOf(currentStatus)}
+                          </span>
+                        ) : (
+                          <select
+                            className="input-select input-compact"
+                            aria-label={`Status for ${app.teacher_name}`}
+                            value={currentStatus}
+                            disabled={updateStatus.isPending && updateStatus.variables?.id === app.id}
+                            onChange={(e) => handleStatusChange(app, e.target.value)}
+                          >
+                            {APPLICATION_STATUS_OPTIONS.map((o) => {
+                              const allowed = o.value === currentStatus || canTransitionApplicationStatus(currentStatus, o.value);
+                              return (
+                                <option key={o.value} value={o.value} disabled={!allowed}>
+                                  {o.label}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        )}
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", flexWrap: "wrap" }}>
+                          <button
+                            className="btn btn-outline btn-sm"
+                            title="View full candidate details, qualifications & resume"
+                            onClick={() => setSelectedApplicantId(app.id)}
+                            style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+                          >
+                            <Eye size={13} /> View Resume
+                          </button>
+                          {app.interview_date ? (
+                            <span style={{ fontSize: "0.85rem", color: "var(--color-brand-accent)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                              <Calendar size={14} aria-hidden="true" /> {formatDate(app.interview_date)}
+                              {app.interview_time ? ` · ${app.interview_time}` : ""}
+                            </span>
+                          ) : (
+                            <button className="btn btn-outline btn-sm" disabled={terminal} onClick={() => setDemoFor(app)}>
+                              <Video size={13} /> Schedule Demo
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </QueryState>
+
+      {selectedApplicant && (
+        <ApplicantDetailsModal
+          application={selectedApplicant}
+          onClose={() => setSelectedApplicantId(null)}
+          onUpdateStatus={handleStatusChange}
+          onScheduleDemo={(app) => setDemoFor(app)}
+          isUpdating={updateStatus.isPending}
+        />
+      )}
 
       {demoFor && <ScheduleDemoModal application={demoFor} onClose={() => setDemoFor(null)} />}
     </div>

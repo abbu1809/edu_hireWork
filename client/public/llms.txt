@@ -6,7 +6,7 @@
 - Institutes post teaching vacancies (subject, classes/exams, board, salary, city, urgency) and track applicants in an ATS pipeline: Applied → Under Review → Shortlisted → Interview/Demo → Selected/Rejected.
 - Teachers create a profile, upload a resume, ID proof and degree certificates, and apply to vacancies for free.
 - Institutes schedule whiteboard demo lectures (date, time, topic, meeting link) with shortlisted applicants.
-- Teacher phone numbers, emails and resumes are masked until an institute pays a one-time fee (default ₹499, via Razorpay) to unlock that profile.
+- Teacher phone numbers, emails and resumes are masked until an institute pays a one-time fee (default ₹49, via Razorpay) to unlock that profile.
 - An admin team verifies teacher and institute documents and awards a Verified badge, usually within 24–48 hours.
 
 ## Key facts

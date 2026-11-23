@@ -28,7 +28,7 @@ export const config = {
   },
 
   pricing: {
-    instituteUnlockFee: Number(process.env.INSTITUTE_UNLOCK_FEE) || 499,
+    instituteUnlockFee: Number(process.env.INSTITUTE_UNLOCK_FEE) || 49,
   },
 
   session: {

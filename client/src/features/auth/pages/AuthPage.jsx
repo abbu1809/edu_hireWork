@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { loginUser, registerUser, setUser } from "../store/authSlice";
+import { bootstrapSession, loginUser, registerUser, setUser } from "../store/authSlice";
 import { authApi } from "../api/auth.api";
 import { useAuth } from "../hooks/useAuth";
 import { GoogleButton, PasswordInput, RoleSelector, readAuthHash } from "../components/AuthFormParts";
@@ -51,16 +51,31 @@ export default function AuthPage({ forcedMode }) {
   const [verifying, setVerifying] = useState(false);
   const { data: authConfig } = useQuery({ queryKey: ["auth", "config"], queryFn: authApi.config, staleTime: 10 * 60 * 1000 });
 
+  const oauthHandled = useRef(false);
+
   // Listen for successful authentication from the Google OAuth popup
   useEffect(() => {
-    const handleAuthSuccess = (data) => {
-      if (data?.type === "oauth_success" && data.user) {
+    const handleAuthMessage = (data) => {
+      if (!data) return;
+
+      if (data.type === "oauth_error") {
+        setGoogleBusy(false);
+        if (data.message) notify.error(data.message);
+        return;
+      }
+
+      if (data.type === "oauth_success" && data.user && !oauthHandled.current) {
+        oauthHandled.current = true;
         setGoogleBusy(false);
         if (data.session) {
           applySession(data.session);
         }
         dispatch(setUser(data.user));
-        notify.success(data.created ? `Welcome ${data.user.name}! Your ${data.user.role?.toUpperCase()} account is ready.` : "Logged in successfully!");
+        notify.success(
+          data.created
+            ? `Welcome ${data.user.name}! Your ${data.user.role?.toUpperCase()} account is ready.`
+            : "Logged in successfully!"
+        );
         navigate(location.state?.from || homePathForRole(data.user.role), { replace: true });
       }
     };
@@ -68,17 +83,22 @@ export default function AuthPage({ forcedMode }) {
     // 1. BroadcastChannel: works across tabs/windows of the same origin even when COOP severs opener
     const authChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("eduhire-auth") : null;
     if (authChannel) {
-      authChannel.onmessage = (e) => handleAuthSuccess(e.data);
+      authChannel.onmessage = (e) => handleAuthMessage(e.data);
     }
 
-    // 2. Storage event fallback
-    const handleStorage = (e) => {
-      if (e.key === "eduhire_oauth_event" && e.newValue) {
+    // 2. Token-free storage ping fallback: restores session from httpOnly cookie if BroadcastChannel was missed
+    const handleStorage = async (e) => {
+      if (e.key === "eduhire_oauth_ping" && e.newValue && !oauthHandled.current) {
         try {
-          const data = JSON.parse(e.newValue);
-          handleAuthSuccess(data);
-          localStorage.removeItem("eduhire_oauth_event");
+          localStorage.removeItem("eduhire_oauth_ping");
         } catch {}
+        const result = await dispatch(bootstrapSession());
+        if (bootstrapSession.fulfilled.match(result) && result.payload?.user && !oauthHandled.current) {
+          oauthHandled.current = true;
+          setGoogleBusy(false);
+          notify.success("Logged in successfully!");
+          navigate(location.state?.from || homePathForRole(result.payload.user.role), { replace: true });
+        }
       }
     };
     window.addEventListener("storage", handleStorage);
@@ -86,13 +106,18 @@ export default function AuthPage({ forcedMode }) {
     // 3. postMessage fallback (when opener is available)
     const handleMessage = (e) => {
       if (e.origin !== window.location.origin) return;
-      handleAuthSuccess(e.data);
+      handleAuthMessage(e.data);
     };
     window.addEventListener("message", handleMessage);
 
     // Reset loading state when tab regains focus or returns via bfcache
     const handleFocus = () => {
       setTimeout(() => setGoogleBusy(false), 600);
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        setTimeout(() => setGoogleBusy(false), 600);
+      }
     };
     const handleReset = () => {
       setBusy(false);
@@ -101,11 +126,7 @@ export default function AuthPage({ forcedMode }) {
 
     window.addEventListener("focus", handleFocus);
     window.addEventListener("pageshow", handleReset);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        setTimeout(() => setGoogleBusy(false), 600);
-      }
-    });
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       if (authChannel) authChannel.close();
@@ -113,6 +134,7 @@ export default function AuthPage({ forcedMode }) {
       window.removeEventListener("message", handleMessage);
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("pageshow", handleReset);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [dispatch, location.state, navigate]);
 
@@ -259,29 +281,44 @@ export default function AuthPage({ forcedMode }) {
   };
 
   const handleGoogle = async () => {
+    oauthHandled.current = false;
     setGoogleBusy(true);
+
+    // Open popup synchronously inside the click handler so browsers never block it.
+    const width = 500;
+    const height = 650;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+    const popup = window.open(
+      "",
+      "google_auth_popup",
+      `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes`
+    );
+
+    if (popup) {
+      try {
+        popup.document.title = "Sign in with Google";
+        popup.document.body.innerHTML =
+          '<div style="font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;color:#1f2937;background:#faf9f6;">Connecting to Google…</div>';
+      } catch {}
+    }
+
     try {
       // New sign-ups carry the chosen role; sign-ins keep the account's existing role.
       const role = authMode === "signup" ? signupRole : undefined;
-      const result = await authApi.googleUrl({ role, intent: authMode });
+      const result = await authApi.googleUrl({ role, intent: authMode, popup: Boolean(popup) });
       if (!result?.url) throw new Error("Google sign-in URL was not returned by the server.");
 
-      // Open a centered popup window for Google sign-in
-      const width = 500;
-      const height = 650;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      const popup = window.open(
-        result.url,
-        "google_auth_popup",
-        `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes`
-      );
-
-      // Fallback only if popup is blocked by the browser
-      if (!popup) {
+      if (popup) {
+        popup.location.href = result.url;
+      } else {
+        // Fallback only if popup was blocked by the browser
         window.location.assign(result.url);
       }
     } catch (error) {
+      try {
+        popup?.close();
+      } catch {}
       notify.error(`Google sign-in error: ${getErrorMessage(error)}`);
       setGoogleBusy(false);
     }

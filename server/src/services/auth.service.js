@@ -2,7 +2,7 @@ import { config } from "../config/env.js";
 import { serviceDb, createAnonClient } from "../config/supabase.js";
 import { ApiError, unwrap } from "../utils/ApiError.js";
 import { normalizeEmail, normalizePhone } from "../utils/normalize.js";
-import { calculateProfileCompletion } from "../utils/profileCompletion.js";
+import { calculateProfileCompletion, calculateInstituteProfileCompletion } from "../utils/profileCompletion.js";
 import { ProfileModel } from "../models/profile.model.js";
 import { TeacherModel } from "../models/teacher.model.js";
 import { InstituteModel } from "../models/institute.model.js";
@@ -58,7 +58,13 @@ export const AuthService = {
     };
 
     if (role === "teacher") {
-      user.profile_completion_percent = calculateProfileCompletion(merged).percent;
+      const comp = calculateProfileCompletion(merged);
+      user.profile_completion_percent = comp.percent;
+      user.missing_profile_items = comp.missingItems;
+    } else if (role === "institute") {
+      const comp = calculateInstituteProfileCompletion(merged);
+      user.profile_completion_percent = comp.percent;
+      user.missing_profile_items = comp.missingItems;
     }
 
     // Avatars live in a public bucket; resolve any legacy stored value to a usable URL.
@@ -191,11 +197,15 @@ export const AuthService = {
   },
 
   /** Returns the Google consent URL. The browser comes back to /auth/callback with tokens. */
-  async getGoogleAuthUrl({ role, intent }) {
+  async getGoogleAuthUrl({ role, intent, popup = false, origin = "" }) {
     const params = new URLSearchParams();
     if (role && SELF_SERVICE_ROLES.includes(role)) params.set("role", role);
     if (intent) params.set("intent", intent);
-    const redirectTo = `${config.clientUrl}/auth/callback${params.toString() ? `?${params}` : ""}`;
+    if (popup) params.set("popup", "1");
+
+    const baseClientUrl =
+      origin && config.clientUrls.includes(origin) ? origin : config.clientUrl;
+    const redirectTo = `${baseClientUrl}/auth/callback${params.toString() ? `?${params}` : ""}`;
 
     const { data, error } = await createAnonClient().auth.signInWithOAuth({
       provider: "google",

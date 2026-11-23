@@ -1,4 +1,4 @@
-import { useArchiveEntity, useFeatureEntity, useVerifyEntity } from "./useAdmin";
+import { useArchiveEntity, useFeatureEntity, useVerifyEntity, useDeleteEntity } from "./useAdmin";
 import { useConfirm } from "@/shared/components/ConfirmDialog";
 import { notify } from "@/shared/utils/notify";
 
@@ -12,11 +12,12 @@ export const useEntityActions = (entity) => {
   const verify = useVerifyEntity();
   const feature = useFeatureEntity();
   const archive = useArchiveEntity();
+  const del = useDeleteEntity();
   const confirm = useConfirm();
   const noun = entity === "teachers" ? "Teacher" : "Institute";
 
   return {
-    pending: verify.isPending || feature.isPending || archive.isPending,
+    pending: verify.isPending || feature.isPending || archive.isPending || del.isPending,
 
     /** `defaultReason` pre-fills the reason box (e.g. for revoking a verified profile). */
     setVerification: async (row, status, defaultReason) => {
@@ -77,6 +78,26 @@ export const useEntityActions = (entity) => {
         {
           onSuccess: () => notify.info(isArchived ? `${noun} profile restored to Active.` : `${noun} profile archived.`),
           onError: (error) => notify.apiError(error, "Archive action failed."),
+        }
+      );
+    },
+
+    deleteEntity: async (row, onSuccess) => {
+      const ok = await confirm({
+        title: `Permanently Delete ${nameOf(row)}?`,
+        message: `Are you sure you want to permanently delete ${nameOf(row)}? This will completely wipe their profile, auth credentials, and platform data. This action CANNOT be undone.`,
+        confirmLabel: "Delete Permanently",
+        tone: "danger",
+      });
+      if (!ok) return;
+      del.mutate(
+        { entity, id: row.id, permanent: true },
+        {
+          onSuccess: () => {
+            notify.success(`${noun} has been permanently deleted.`);
+            onSuccess?.();
+          },
+          onError: (error) => notify.apiError(error, "Failed to delete."),
         }
       );
     },

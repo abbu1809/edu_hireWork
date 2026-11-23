@@ -6,6 +6,9 @@ import { InstituteModel } from "../models/institute.model.js";
 import { VacancyModel } from "../models/vacancy.model.js";
 import { ApplicationModel } from "../models/application.model.js";
 import { PaymentModel } from "../models/payment.model.js";
+import { DocumentModel } from "../models/document.model.js";
+import { StorageService, bucketForDocumentType } from "../services/storage.service.js";
+import { serviceDb } from "../config/supabase.js";
 import {
   FormFieldModel,
   PaymentLinkModel,
@@ -65,8 +68,65 @@ export const AdminController = {
     res.json({ success: true, data: await TeacherModel.listAll(req.db, req.query) });
   }),
 
+  getTeacherDetails: asyncHandler(async (req, res) => {
+    const teacher = await TeacherModel.findById(req.db, req.params.id);
+    if (!teacher) throw ApiError.notFound("Teacher not found.");
+
+    // List documents uploaded by this teacher (KYC, degrees, experience letters, etc.)
+    const docs = await DocumentModel.listByUser(req.db, req.params.id).catch(() => []);
+    const resolvedDocs = await Promise.all(
+      docs.map(async (doc) => {
+        const bucket = bucketForDocumentType(doc.document_type);
+        const signedUrl = await StorageService.resolveUrl(req.db, bucket, doc.file_url).catch(() => null);
+        return { ...doc, signed_url: signedUrl };
+      })
+    );
+
+    // If teacher has resume_url on profile directly, resolve it too
+    let resumeSignedUrl = null;
+    if (teacher.resume_url) {
+      resumeSignedUrl = await StorageService.resolveUrl(req.db, "resumes", teacher.resume_url).catch(() => null);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        ...teacher,
+        resume_signed_url: resumeSignedUrl,
+        documents: resolvedDocs,
+      },
+    });
+  }),
+
   listInstitutes: asyncHandler(async (req, res) => {
     res.json({ success: true, data: await InstituteModel.list(req.db) });
+  }),
+
+  getInstituteDetails: asyncHandler(async (req, res) => {
+    const institute = await InstituteModel.findById(req.db, req.params.id);
+    if (!institute) throw ApiError.notFound("Institute not found.");
+
+    const [vacancies, docs] = await Promise.all([
+      VacancyModel.listByInstitute(req.db, req.params.id).catch(() => []),
+      DocumentModel.listByUser(req.db, req.params.id).catch(() => []),
+    ]);
+
+    const resolvedDocs = await Promise.all(
+      docs.map(async (doc) => {
+        const bucket = bucketForDocumentType(doc.document_type);
+        const signedUrl = await StorageService.resolveUrl(req.db, bucket, doc.file_url).catch(() => null);
+        return { ...doc, signed_url: signedUrl };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: {
+        ...institute,
+        vacancies,
+        documents: resolvedDocs,
+      },
+    });
   }),
 
   createTeacher: asyncHandler(async (req, res) => {
@@ -151,11 +211,17 @@ export const AdminController = {
   }),
 
   deleteEntity: asyncHandler(async (req, res) => {
+    const isPermanent = req.query.permanent === "true";
     const data = await rpc(req.db, "admin_delete_profile", {
       p_entity_type: entityFromParams(req),
       p_entity_id: req.params.id,
-      p_permanent: req.query.permanent === "true",
+      p_permanent: isPermanent,
     });
+    if (isPermanent && serviceDb?.auth?.admin?.deleteUser) {
+      await serviceDb.auth.admin.deleteUser(req.params.id).catch((err) => {
+        console.warn(`[admin.deleteEntity] Failed to delete auth user ${req.params.id}:`, err?.message);
+      });
+    }
     res.json({ success: true, data });
   }),
 

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { authApi } from "../api/auth.api";
 import { applySession, clearSession, broadcastLogout, getErrorMessage, refreshAccessToken } from "@/shared/api/httpClient";
+import { tokenStorage } from "@/shared/api/tokenStorage";
 
 const toRejection = (error, fallback) => ({
   message: getErrorMessage(error, fallback),
@@ -18,7 +19,8 @@ export const bootstrapSession = createAsyncThunk("auth/bootstrap", async () => {
     const result = await refreshAccessToken();
     return { user: result.user || null, needsRole: result.needsRole };
   } catch {
-    clearSession();
+    // Only clear if another flow (e.g. OAuth callback or login) hasn't already established a session.
+    if (!tokenStorage.getAccessToken()) clearSession();
     return { user: null };
   }
 });
@@ -104,6 +106,7 @@ const authSlice = createSlice({
     /** Replaces the user after a profile update or upload returns the fresh record. */
     setUser(state, action) {
       state.user = action.payload;
+      state.status = "ready";
     },
     mergeUser(state, action) {
       if (state.user) state.user = { ...state.user, ...action.payload };
@@ -116,11 +119,10 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(bootstrapSession.fulfilled, (state, action) => {
-        state.user = action.payload.user || null;
+        if (action.payload.user) state.user = action.payload.user;
         state.status = "ready";
       })
       .addCase(bootstrapSession.rejected, (state) => {
-        state.user = null;
         state.status = "ready";
       })
       .addCase(refreshCurrentUser.fulfilled, (state, action) => {

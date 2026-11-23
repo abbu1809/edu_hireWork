@@ -34,6 +34,32 @@ export const APPLICATION_STATUS_OPTIONS = [
   { value: "REJECTED", label: "Rejected" },
 ];
 
+export const APPLICATION_STATUS_ORDER = {
+  APPLIED: 0,
+  UNDER_REVIEW: 1,
+  SHORTLISTED: 2,
+  INTERVIEW: 3,
+  SELECTED: 4,
+  REJECTED: 4,
+  WITHDRAWN: 4,
+};
+
+export const TERMINAL_APPLICATION_STATUSES = ["SELECTED", "REJECTED", "WITHDRAWN"];
+
+export const isTerminalApplicationStatus = (status) =>
+  TERMINAL_APPLICATION_STATUSES.includes(status);
+
+export const canTransitionApplicationStatus = (fromStatus, toStatus) => {
+  const from = fromStatus || "APPLIED";
+  if (from === toStatus) return false;
+  if (isTerminalApplicationStatus(from)) return false;
+  if (toStatus === "REJECTED") return true;
+  const fromRank = APPLICATION_STATUS_ORDER[from];
+  const toRank = APPLICATION_STATUS_ORDER[toStatus];
+  if (fromRank === undefined || toRank === undefined) return false;
+  return toRank > fromRank;
+};
+
 export const CONTENT_STREAMS = [
   { id: "TEACHER_UPDATE", slug: "teacher-updates", label: "Teacher Updates", icon: "GraduationCap" },
   { id: "INSTITUTE_UPDATE", slug: "institute-updates", label: "Institute Recruiter Hub", icon: "School" },

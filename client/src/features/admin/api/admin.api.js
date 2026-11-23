@@ -5,7 +5,11 @@ export const adminApi = {
   stats: () => unwrap(http.get("/admin/stats")),
 
   teachers: () => unwrap(http.get("/admin/teachers")),
+  getTeacher: (id) => unwrap(http.get(`/admin/teachers/${id}`)),
   institutes: () => unwrap(http.get("/admin/institutes")),
+  getInstitute: (id) => unwrap(http.get(`/admin/institutes/${id}`)),
+  deleteEntity: ({ entity, id, permanent = true }) =>
+    unwrap(http.delete(`/admin/${entity}/${id}`, { params: { permanent } })),
   verify: ({ entity, id, status, reason, notes }) => unwrap(http.post(`/admin/${entity}/${id}/verify`, { status, reason, notes })),
   feature: ({ entity, id, feature }) => unwrap(http.post(`/admin/${entity}/${id}/feature`, { feature })),
   archive: ({ entity, id, archive }) => unwrap(http.post(`/admin/${entity}/${id}/archive`, { archive })),
