@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: eduhire-api
+    name: facultykart-api
     runtime: node
     plan: free
     rootDir: server
@@ -29,3 +29,5 @@ services:
         sync: false
       - key: INSTITUTE_UNLOCK_FEE
         value: "49"
+      - key: FACULTY_REGISTRATION_FEE
+        value: "9"

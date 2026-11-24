@@ -7,7 +7,8 @@ const router = Router();
 // The webhook route is mounted in app.js with a raw body parser so the signature can be verified.
 router.get("/config", PaymentController.config);
 router.post("/unlock-order", authenticate, requireRole("institute"), PaymentController.createUnlockOrder);
-router.post("/verify", authenticate, requireRole("institute"), PaymentController.verify);
+router.post("/faculty-registration-order", authenticate, requireRole("teacher"), PaymentController.createFacultyRegistrationOrder);
+router.post("/verify", authenticate, PaymentController.verify);
 router.get("/mine", authenticate, PaymentController.listMine);
 
 export default router;

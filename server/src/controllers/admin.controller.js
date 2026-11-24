@@ -171,7 +171,7 @@ export const AdminController = {
         userId: req.params.id,
         title: approved ? "🎉 KYC Verification Approved!" : "⚠️ KYC Verification Update",
         message: approved
-          ? "Your credentials have been verified by EduHire Bridge."
+          ? "Your credentials have been verified by FacultyKart."
           : `Your KYC submission was reviewed and rejected.${reason ? ` Reason: ${reason}` : " Please update your credentials."}`,
         type: "KYC",
       });
@@ -251,19 +251,19 @@ export const AdminController = {
     if (!vacancy) throw ApiError.notFound("Vacancy not found.");
     if (!teacher) throw ApiError.notFound("Teacher not found.");
 
-    const extra = note ? ` Note from EduHire: ${note}` : "";
+    const extra = note ? ` Note from FacultyKart: ${note}` : "";
     await Promise.all([
       NotificationService.notify({
         userId: vacancy.institute_id,
         title: "Mediator Recommendation",
-        message: `EduHire recommends ${teacher.name} (${teacher.primary_subject || "Faculty"}) for "${vacancy.title}".${extra}`,
+        message: `FacultyKart recommends ${teacher.name} (${teacher.primary_subject || "Faculty"}) for "${vacancy.title}".${extra}`,
         type: "MATCH",
         link: "/institute/talent",
       }),
       NotificationService.notify({
         userId: teacher.id,
         title: "You've been recommended for a vacancy",
-        message: `EduHire recommended you to ${vacancy.institute_name} for "${vacancy.title}". Apply from Explore Vacancies.${extra}`,
+        message: `FacultyKart recommended you to ${vacancy.institute_name} for "${vacancy.title}". Apply from Explore Vacancies.${extra}`,
         type: "MATCH",
         link: "/teacher/jobs",
       }),
@@ -273,7 +273,7 @@ export const AdminController = {
       EmailService.sendToUser(
         vacancy.institute_id,
         "matchRecommendation",
-        { message: `EduHire recommends ${teacher.name} (${teacher.primary_subject || "Faculty"}) for "${vacancy.title}".${extra}`, path: "/institute/talent" },
+        { message: `FacultyKart recommends ${teacher.name} (${teacher.primary_subject || "Faculty"}) for "${vacancy.title}".${extra}`, path: "/institute/talent" },
         { preference: "email_notifications_enabled" }
       )
     );
@@ -281,7 +281,7 @@ export const AdminController = {
       EmailService.sendToUser(
         teacher.id,
         "matchRecommendation",
-        { message: `EduHire recommended you to ${vacancy.institute_name} for "${vacancy.title}".${extra}`, path: `/careers/${vacancy.id}` },
+        { message: `FacultyKart recommended you to ${vacancy.institute_name} for "${vacancy.title}".${extra}`, path: `/careers/${vacancy.id}` },
         { preference: "employer_interest_enabled" }
       )
     );
@@ -307,7 +307,7 @@ export const AdminController = {
 
     const count = await NotificationService.broadcast({
       roles,
-      title: title?.trim() || "Announcement from EduHire Bridge",
+      title: title?.trim() || "Announcement from FacultyKart",
       message: String(message).trim(),
       link,
     });

@@ -26,7 +26,7 @@ export default function TeacherJobsPage() {
     <div>
       <DashboardHeader title="Explore Teaching Vacancies" subtitle="Verified openings from accredited IIT-JEE, NEET, and CBSE coaching centers" />
 
-      {completionScore < 75 && (
+      {(!currentUser?.is_platform_fee_paid || completionScore < 75) && (
         <ProfileCompletionCard
           role="teacher"
           percent={completionScore}

@@ -9,21 +9,21 @@ import Accordion from "@/shared/components/Accordion";
 
 const DESCRIPTIONS = {
   about:
-    "EduHire Bridge is India's verified faculty-hiring platform for IIT-JEE, NEET and school institutions — credential checks, demo lectures and an applicant tracking system in one place.",
-  contact: "Contact the EduHire Bridge team for institute hiring support, teacher verification questions or partnership inquiries.",
-  privacy: "How EduHire Bridge collects, protects and masks educator and institute data, including contact details and payments.",
-  terms: "Terms of service for institutes and educators using the EduHire Bridge hiring platform.",
-  disclaimer: "EduHire Bridge is a hiring mediation and verification platform; employment contracts are between candidates and institutions.",
+    "FacultyKart is India's verified faculty-hiring platform for IIT-JEE, NEET and school institutions — credential checks, demo lectures and an applicant tracking system in one place.",
+  contact: "Contact the FacultyKart team for institute hiring support, teacher verification questions or partnership inquiries.",
+  privacy: "How FacultyKart collects, protects and masks educator and institute data, including contact details and payments.",
+  terms: "Terms of service for institutes and educators using the FacultyKart hiring platform.",
+  disclaimer: "FacultyKart is a hiring mediation and verification platform; employment contracts are between candidates and institutions.",
 };
 
 // Answer-first Q&A for answer engines (published as FAQPage structured data).
 const ABOUT_FAQS = [
   {
-    q: "Who can use EduHire Bridge?",
+    q: "Who can use FacultyKart?",
     a: "Teachers and subject faculty looking for coaching or school jobs, and coaching institutes, schools and junior colleges hiring for IIT-JEE, NEET, Foundation, Olympiad and K-12 roles anywhere in India.",
   },
   {
-    q: "How much does EduHire Bridge cost?",
+    q: "How much does FacultyKart cost?",
     a: "Teachers use the platform for free. Institutes can post vacancies and review applicants for free and pay a one-time fee only when they unlock a teacher's direct contact details and resume.",
   },
   {
@@ -31,7 +31,7 @@ const ABOUT_FAQS = [
     a: "Our team usually reviews submitted ID proofs and degree certificates within 24–48 hours. Verified profiles get a Verified badge and can be featured to institutes.",
   },
   {
-    q: "Which cities does EduHire Bridge cover?",
+    q: "Which cities does FacultyKart cover?",
     a: "Institutes and teachers from any Indian city can join. Most activity today is in Kota, Delhi NCR, Bangalore and Hyderabad.",
   },
 ];
@@ -60,7 +60,9 @@ function ContactSection() {
     });
   };
 
-  const email = settings?.contact_email;
+  const email = settings?.contact_email || "contact@facultykart.in";
+  const infoEmail = "info@facultykart.in";
+  const supportEmail = "support@facultykart.in";
   const phone = settings?.support_phone;
   const address = settings?.office_address;
 
@@ -71,7 +73,7 @@ function ContactSection() {
           Support & Desks
         </span>
         <h1 className="serif-headline" style={{ fontSize: "clamp(1.85rem, 5vw, 2.4rem)", color: "var(--color-brand-house)", marginBottom: "0.5rem" }}>
-          Contact EduHire Bridge
+          Contact FacultyKart
         </h1>
         <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem" }}>Reach out to our academic talent advisors or visit our regional coordination hubs.</p>
       </div>
@@ -143,17 +145,35 @@ function ContactSection() {
         <div>
           <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "1.25rem" }}>Official Contact Points</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            {email && (
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-                <Mail size={20} color="var(--color-brand-accent)" style={{ flexShrink: 0 }} />
-                <div>
-                  <div style={{ fontWeight: "600" }}>General & Recruiter Inquiries</div>
-                  <a href={`mailto:${email}`} style={{ color: "var(--color-brand-green)", wordBreak: "break-all" }}>
-                    {email}
-                  </a>
-                </div>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+              <Mail size={20} color="var(--color-brand-accent)" style={{ flexShrink: 0 }} />
+              <div>
+                <div style={{ fontWeight: "600" }}>General & Recruiter Desk</div>
+                <a href={`mailto:${email}`} style={{ color: "var(--color-brand-green)", wordBreak: "break-all" }}>
+                  {email}
+                </a>
               </div>
-            )}
+            </div>
+
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+              <Mail size={20} color="var(--color-brand-accent)" style={{ flexShrink: 0 }} />
+              <div>
+                <div style={{ fontWeight: "600" }}>Information & Partnerships</div>
+                <a href={`mailto:${infoEmail}`} style={{ color: "var(--color-brand-green)", wordBreak: "break-all" }}>
+                  {infoEmail}
+                </a>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+              <Mail size={20} color="var(--color-brand-accent)" style={{ flexShrink: 0 }} />
+              <div>
+                <div style={{ fontWeight: "600" }}>Candidate & Verification Helpdesk</div>
+                <a href={`mailto:${supportEmail}`} style={{ color: "var(--color-brand-green)", wordBreak: "break-all" }}>
+                  {supportEmail}
+                </a>
+              </div>
+            </div>
 
             {phone && (
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
@@ -209,7 +229,7 @@ export default function StaticPolicyPages({ page = "about" }) {
         <article className="card" style={articleStyle}>
           <div style={{ borderBottom: "1px solid var(--color-canvas-ceramic)", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
             <span className="badge badge-gold" style={{ marginBottom: "0.75rem" }}>
-              About EduHire Bridge
+              About FacultyKart
             </span>
             <h1 className="serif-headline" style={{ fontSize: "clamp(1.85rem, 5vw, 2.4rem)", color: "var(--color-brand-house)", marginBottom: "0.5rem" }}>
               Empowering India's Premier Educational Ecosystem
@@ -224,15 +244,15 @@ export default function StaticPolicyPages({ page = "about" }) {
               Our Mission
             </h2>
             <p style={{ marginBottom: "1rem" }}>
-              EduHire Bridge was founded to bridge the critical gap between verified academic talent and progressive coaching institutions. In the competitive test preparation ecosystem of Kota, Delhi NCR, Hyderabad, and Bangalore, hiring the right faculty is pivotal to institutional success and student outcomes.
+              FacultyKart was founded to bridge the critical gap between verified academic talent and progressive coaching institutions. In the competitive test preparation ecosystem of Kota, Delhi NCR, Hyderabad, and Bangalore, hiring the right faculty is pivotal to institutional success and student outcomes.
             </p>
             <p>
-              Traditional recruitment channels often result in misaligned expectations, unverified qualifications, and prolonged hiring cycles. EduHire Bridge eliminates this friction through a rigorous credential verification framework, structured whiteboard demo evaluation rubrics, and automated applicant tracking.
+              Traditional recruitment channels often result in misaligned expectations, unverified qualifications, and prolonged hiring cycles. FacultyKart eliminates this friction through a rigorous credential verification framework, structured whiteboard demo evaluation rubrics, and automated applicant tracking.
             </p>
           </section>
 
           <section className="card-gold-wash" style={{ marginBottom: "2.5rem" }}>
-            <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "1rem" }}>Why Choose EduHire Bridge?</h3>
+            <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "1rem" }}>Why Choose FacultyKart?</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "1.5rem" }}>
               <div>
                 <h4 style={{ color: "var(--color-brand-house)", marginBottom: "0.35rem", display: "flex", alignItems: "center", gap: "0.4rem" }}><ShieldCheck size={18} aria-hidden="true" /> 100% Verified Credentials</h4>
@@ -291,13 +311,13 @@ export default function StaticPolicyPages({ page = "about" }) {
           <h1 className="serif-headline" style={{ fontSize: "2.2rem", color: "var(--color-brand-house)", marginBottom: "1.5rem" }}>
             Privacy Policy
           </h1>
-          <p>EduHire Bridge values your privacy. This policy explains how we handle your educator and institutional data:</p>
+          <p>FacultyKart values your privacy. This policy explains how we handle your educator and institutional data:</p>
           <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginTop: "1.5rem", marginBottom: "0.5rem" }}>1. Information Collected</h3>
           <p>We collect identity credentials, contact information, educational degrees, and demo recordings strictly for hiring verification.</p>
           <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginTop: "1.5rem", marginBottom: "0.5rem" }}>2. Data Masking</h3>
           <p>Teacher phone numbers and resumes are masked by default to prevent unsolicited contact and spam.</p>
           <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginTop: "1.5rem", marginBottom: "0.5rem" }}>3. Payments</h3>
-          <p>Contact-unlock payments are processed by Razorpay. EduHire Bridge never sees or stores your card or UPI credentials.</p>
+          <p>Contact-unlock payments are processed by Razorpay. FacultyKart never sees or stores your card or UPI credentials.</p>
         </article>
       )}
 
@@ -309,7 +329,7 @@ export default function StaticPolicyPages({ page = "about" }) {
           <h1 className="serif-headline" style={{ fontSize: "2.2rem", color: "var(--color-brand-house)", marginBottom: "1.5rem" }}>
             Terms of Service
           </h1>
-          <p>By using EduHire Bridge, institutes and educators agree to provide authentic information and conduct transparent hiring practices.</p>
+          <p>By using FacultyKart, institutes and educators agree to provide authentic information and conduct transparent hiring practices.</p>
         </article>
       )}
 
@@ -322,7 +342,7 @@ export default function StaticPolicyPages({ page = "about" }) {
             Platform Disclaimer
           </h1>
           <p>
-            EduHire Bridge acts as an academic hiring mediation and verification platform. While we rigorously verify candidate documents and coaching credentials, final employment offers and employment contracts are solely between the candidate and the hiring institution.
+            FacultyKart acts as an academic hiring mediation and verification platform. While we rigorously verify candidate documents and coaching credentials, final employment offers and employment contracts are solely between the candidate and the hiring institution.
           </p>
         </article>
       )}

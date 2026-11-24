@@ -1,8 +1,8 @@
 {
-  "name": "eduhire-platform",
+  "name": "facultykart-platform",
   "version": "2.0.0",
   "private": true,
-  "description": "EduHire Bridge — teacher & institute hiring platform (database → server → client)",
+  "description": "FacultyKart — teacher & institute hiring platform (database → server → client)",
   "workspaces": [
     "client",
     "server"

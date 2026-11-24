@@ -94,7 +94,7 @@ export default function BlogPostDetailPage() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: "1rem", color: "var(--text-secondary)", fontSize: "0.9rem", flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-              <User size={16} /> {article.author_name || "EduHire Editorial"}
+              <User size={16} /> {article.author_name || "FacultyKart Editorial"}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
               <Calendar size={16} /> {formatDate(article.published_at || article.created_at)}

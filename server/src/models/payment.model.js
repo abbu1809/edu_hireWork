@@ -30,6 +30,14 @@ export const PaymentModel = {
     unwrap(await serviceDb.from("payments").update({ status: "FAILED" }).eq("order_id", orderId).eq("status", "CREATED"));
   },
 
+  async hasCapturedPayment(db, payerId, purposeType) {
+    if (!payerId) return false;
+    let query = db.from("payments").select("id").eq("payer_id", payerId).eq("status", "CAPTURED");
+    if (purposeType) query = query.eq("purpose_type", purposeType);
+    const { data } = await query.limit(1);
+    return Boolean(data && data.length > 0);
+  },
+
   async listByPayer(db, payerId) {
     return (
       unwrap(await db.from("payments").select("*").eq("payer_id", payerId).order("created_at", { ascending: false })) || []

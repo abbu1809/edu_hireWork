@@ -49,7 +49,7 @@ export default function ContentHubPage({ stream: streamProp }) {
   useSeo({
     title: activeStream === "ALL" ? "Content Hub — Teaching Career Guides & Hiring Trends" : `${activeLabel} — Articles & Guides`,
     description:
-      "Career guides for teachers, recruiter playbooks for coaching institutes, faculty salary trends and JEE/NEET hiring insights from EduHire Bridge.",
+      "Career guides for teachers, recruiter playbooks for coaching institutes, faculty salary trends and JEE/NEET hiring insights from FacultyKart.",
     jsonLd: posts.length ? itemListSchema("Articles", posts.map((p) => ({ name: p.title, path: `/blog/${p.slug}` }))) : null,
   });
 
@@ -58,7 +58,7 @@ export default function ContentHubPage({ stream: streamProp }) {
       {/* Top Banner Header */}
       <div style={{ textAlign: "center", marginBottom: "3rem" }}>
         <div className="badge badge-gold" style={{ marginBottom: "0.75rem" }}>
-          <BookOpen size={13} aria-hidden="true" /> EduHire Knowledge Base & Community
+          <BookOpen size={13} aria-hidden="true" /> FacultyKart Knowledge Base & Community
         </div>
         <h1 className="serif-headline" style={{ fontSize: "2.4rem", color: "var(--color-brand-house)", marginBottom: "0.75rem" }}>
           Articles, Career Guides & Hiring Trends
@@ -157,7 +157,7 @@ export default function ContentHubPage({ stream: streamProp }) {
                   }}
                 >
                   <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)" }}>
-                    By {post.author_name || "EduHire Editorial"}
+                    By {post.author_name || "FacultyKart Editorial"}
                     {post.reading_time_minutes ? ` · ${post.reading_time_minutes} min read` : ""}
                   </span>
                   <Link to={`/blog/${post.slug}`} className="btn btn-outline btn-sm">

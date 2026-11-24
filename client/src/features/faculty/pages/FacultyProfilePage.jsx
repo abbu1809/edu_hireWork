@@ -19,7 +19,7 @@ export default function FacultyProfilePage() {
   useSeo({
     title: teacher ? `${teacher.name}${teacher.primary_subject ? ` — ${teacher.primary_subject} Faculty` : ""}${teacher.city ? `, ${teacher.city}` : ""}` : "Faculty Profile",
     description: teacher
-      ? teacher.headline || teacher.bio || `${teacher.name} is a ${teacher.primary_subject || "subject"} educator${teacher.experience_years ? ` with ${teacher.experience_years}+ years of experience` : ""} on EduHire Bridge.`
+      ? teacher.headline || teacher.bio || `${teacher.name} is a ${teacher.primary_subject || "subject"} educator${teacher.experience_years ? ` with ${teacher.experience_years}+ years of experience` : ""} on FacultyKart.`
       : undefined,
     path: `/faculty/${id}`,
     type: "profile",

@@ -33,11 +33,11 @@ import { autoGrid, homePathForRole } from "@/shared/utils/format";
 // Answer-first FAQ copy: also published as FAQPage structured data for answer engines.
 const FAQS = [
   {
-    q: "What is EduHire Bridge?",
-    a: "EduHire Bridge is an Indian faculty-hiring platform that connects coaching institutes and schools with KYC-verified teachers for IIT-JEE, NEET, Foundation and K-12 roles. Institutes post vacancies and schedule demo lectures; teachers apply for free.",
+    q: "What is FacultyKart?",
+    a: "FacultyKart is India's premier faculty-hiring platform that connects coaching institutes and schools with KYC-verified teachers for IIT-JEE, NEET, Foundation and K-12 roles. Institutes post vacancies and schedule demo lectures; teachers apply for free.",
   },
   {
-    q: "How does EduHire Bridge verify teacher credentials?",
+    q: "How does FacultyKart verify teacher credentials?",
     a: "Our administrative team audits government ID proofs, university degrees, past teaching appointment letters, and conducts a preliminary video screening before awarding the Verified badge.",
   },
   {
@@ -50,7 +50,7 @@ const FAQS = [
   },
   {
     q: "Are there any fees for teachers to register and apply?",
-    a: "Educator registration, profile creation, and job applications on EduHire Bridge are completely free for teachers.",
+    a: "Educator registration, profile creation, and job applications on FacultyKart are completely free for teachers.",
   },
 ];
 
@@ -135,7 +135,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="hero-subtitle">
-              EduHire Bridge is India's premier hiring mediator platform empowering coaching institutes, schools, and junior colleges across Kota, Delhi NCR, Bangalore, and across India to discover, screen, and recruit verified teaching talent.
+              FacultyKart is India's premier hiring mediator platform empowering coaching institutes, schools, and junior colleges across Kota, Delhi NCR, Bangalore, and across India to discover, screen, and recruit verified teaching talent.
             </p>
 
             <div className="hero-cta-row">
@@ -298,7 +298,7 @@ export default function LandingPage() {
         </QueryState>
       </section>
 
-      {/* 4. Why EduHire — three pillars on white */}
+      {/* 4. Why FacultyKart — three pillars on white */}
       <section style={{ background: "var(--color-surface-white)" }} aria-labelledby="pillars-heading">
         <div className="section">
           <div className="section-heading">
@@ -329,10 +329,10 @@ export default function LandingPage() {
               Mediation & Quality Assurance
             </span>
             <h2 id="trust-heading" className="serif-headline">
-              Why Institutes & Educators Trust EduHire Bridge
+              Why Institutes & Educators Trust FacultyKart
             </h2>
             <p>
-              Traditional job boards are noisy and flooded with unverified resumes. EduHire Bridge acts as an active mediator, checking degrees, past track record, and conducting demo trial coordination.
+              Traditional job boards are noisy and flooded with unverified resumes. FacultyKart acts as an active mediator, checking degrees, past track record, and conducting demo trial coordination.
             </p>
 
             <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
@@ -346,7 +346,7 @@ export default function LandingPage() {
           </div>
 
           <div className="feature-panel">
-            <h3 style={{ color: "var(--color-gold)", fontSize: "1.15rem", fontWeight: 700, marginBottom: "1.25rem" }}>How hiring works on EduHire</h3>
+            <h3 style={{ color: "var(--color-gold)", fontSize: "1.15rem", fontWeight: 700, marginBottom: "1.25rem" }}>How hiring works on FacultyKart</h3>
             <ol className="steps-list">
               {STEPS.map(([title, text]) => (
                 <li key={title}>

@@ -13,7 +13,7 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("EduHire Application Runtime Error:", error, errorInfo);
+    console.error("FacultyKart Application Runtime Error:", error, errorInfo);
   }
 
   render() {
@@ -27,7 +27,7 @@ export default class ErrorBoundary extends React.Component {
         <div className="card w-full max-w-[520px] text-center" style={{ padding: "2.5rem" }}>
           <GraduationCap size={56} color="var(--color-brand-green)" aria-hidden="true" style={{ display: "block", margin: "0 auto 1rem" }} />
           <h2 style={{ color: "var(--color-brand-house)", fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.75rem" }}>
-            EduHire Bridge
+            FacultyKart
           </h2>
           <div
             className="rounded-lg"

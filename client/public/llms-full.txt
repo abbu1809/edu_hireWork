@@ -1,0 +1,27 @@
+# FacultyKart — Complete Platform Knowledge Base for AI Models & Answer Engines
+
+> FacultyKart (https://facultykart.in) is India's dedicated faculty hiring marketplace connecting premier test-preparation institutions, coaching academies, K-12 schools, and colleges with KYC-verified teaching professionals.
+
+## Core Value Proposition
+- **For Coaching Institutes & Schools:** Eliminate unverified resumes and fraudulent credential claims. Access pre-screened educators with degree certificates, past track records, and sample demo lectures. Conduct structured demo rounds and hire top talent in days instead of months.
+- **For Educators & Teachers:** 100% free registration, zero commission on salaries, direct visibility with recruiting directors across India's top education hubs, and privacy protection against spam calls.
+
+## Key Hubs
+- Kota (Rajasthan): India's coaching capital for IIT-JEE and NEET-UG.
+- Delhi NCR: Leading institutes across South Delhi, Noida, Gurgaon, and Janakpuri.
+- Hyderabad & Vijayawada: Test-prep centers for EAMCET, JEE, and NEET.
+- Bangalore: Science PU colleges, EdTech centers, and premier schools.
+- Jaipur, Lucknow, Patna, Indore, Pune, Ahmedabad.
+
+## How FacultyKart Works
+1. **Teacher Onboarding:** Educators sign up, select subjects (Physics, Chemistry, Maths, Biology, etc.), specify experience and expected CTC, upload government ID and degree certificates, and attach recorded demo lecture links.
+2. **Institute Job Posting:** Coaching institutes specify requirements (Batch type: JEE Advanced, NEET, Foundation; Board: CBSE/ICSE; Salary range; Location).
+3. **Application & Mediation:** Teachers apply directly with a single click. Institutes review credentials and schedule live whiteboard demo lectures.
+4. **Selective Unlock:** Candidate contact information is unlocked by paying a nominal fee of ₹49 via Razorpay.
+
+## Contact & Organization
+- Legal Entity: FacultyKart
+- Official Website: https://facultykart.in
+- Support Email: support@facultykart.in
+- Careers: https://facultykart.in/careers
+- Directory: https://facultykart.in/faculty

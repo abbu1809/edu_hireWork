@@ -75,7 +75,7 @@ export default function Navbar() {
         <Link to="/" className="brand-logo-link" onClick={() => setMobileMenuOpen(false)}>
           <div className="brand-symbol"><GraduationCap size={20} aria-hidden="true" /></div>
           <div className="brand-name">
-            EduHire <span>Bridge</span>
+            Faculty<span>Kart</span>
           </div>
         </Link>
 

@@ -11,7 +11,7 @@ const list = (value, fallback) =>
 export const config = {
   port: Number(process.env.PORT) || 5000,
   nodeEnv: process.env.NODE_ENV || "development",
-  clientUrls: list(process.env.CLIENT_URL, "http://localhost:3000"),
+  clientUrls: list(process.env.CLIENT_URL, "https://facultykart.in,http://localhost:3000"),
 
   supabase: {
     url: (process.env.SUPABASE_URL || "").trim(),
@@ -19,7 +19,7 @@ export const config = {
     serviceRoleKey: (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim(),
   },
 
-  adminEmail: (process.env.ADMIN_EMAIL || "admin@eduhirebridge.in").trim().toLowerCase(),
+  adminEmail: (process.env.ADMIN_EMAIL || "facultykart@gmail.com").trim().toLowerCase(),
 
   razorpay: {
     keyId: (process.env.RAZORPAY_KEY_ID || "").trim(),
@@ -29,6 +29,7 @@ export const config = {
 
   pricing: {
     instituteUnlockFee: Number(process.env.INSTITUTE_UNLOCK_FEE) || 49,
+    facultyRegistrationFee: Number(process.env.FACULTY_REGISTRATION_FEE) || 9,
   },
 
   session: {
@@ -38,7 +39,7 @@ export const config = {
     // "none" in production (with Secure) so cross-site requests between frontend (Vercel) and API (Render) work.
     cookieSameSite: (process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax")).trim().toLowerCase(),
     cookieSecure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === "true" : (process.env.NODE_ENV === "production" || (process.env.COOKIE_SAMESITE || "").toLowerCase() === "none"),
-    // Optional, e.g. ".eduhirebridge.in" to share the cookie across subdomains.
+    // Optional, e.g. ".facultykart.in" to share the cookie across subdomains.
     cookieDomain: (process.env.COOKIE_DOMAIN || "").trim() || undefined,
   },
 
@@ -49,11 +50,11 @@ export const config = {
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : Number(process.env.SMTP_PORT) === 465,
     user: (process.env.SMTP_USER || "").trim(),
     pass: (process.env.SMTP_PASS || "").trim(),
-    fromEmail: (process.env.FROM_EMAIL || process.env.SMTP_USER || "no-reply@eduhirebridge.in").trim(),
-    fromName: (process.env.FROM_NAME || "EduHire Bridge").trim(),
-    replyTo: (process.env.REPLY_TO_EMAIL || "").trim(),
+    fromEmail: (process.env.FROM_EMAIL || process.env.SMTP_USER || "no-reply@facultykart.in").trim(),
+    fromName: (process.env.FROM_NAME || "FacultyKart").trim(),
+    replyTo: (process.env.REPLY_TO_EMAIL || "contact@facultykart.in").trim(),
     // Address that receives copies of contact-form inquiries.
-    adminNotifyEmail: (process.env.ADMIN_NOTIFY_EMAIL || process.env.ADMIN_EMAIL || "").trim().toLowerCase(),
+    adminNotifyEmail: (process.env.ADMIN_NOTIFY_EMAIL || process.env.ADMIN_EMAIL || "facultykart@gmail.com").trim().toLowerCase(),
     otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES) || 10,
     // Require an email OTP before sign-up. Set to "false" to fall back to Supabase confirmation emails.
     requireSignupOtp: process.env.REQUIRE_SIGNUP_OTP !== "false",

@@ -11,7 +11,7 @@ import { EmailService } from "../services/email/email.service.js";
 
 export const PublicController = {
   health: (req, res) => {
-    res.json({ success: true, data: { status: "ok", service: "EduHire Bridge API", timestamp: new Date().toISOString() } });
+    res.json({ success: true, data: { status: "ok", service: "FacultyKart API", timestamp: new Date().toISOString() } });
   },
 
   /** Live platform counters shown on the landing page. */

@@ -21,7 +21,7 @@ const HEADINGS = {
   login: ["Welcome Back", "Sign in to access your verified educator or recruiter dashboard"],
   signup: ["Create Your Account", "Join India's premier faculty hiring mediator network"],
   forgot: ["Reset Password", "Enter your email to receive recovery instructions"],
-  reset_password: ["Set New Password", "Choose a strong password for your EduHire account"],
+  reset_password: ["Set New Password", "Choose a strong password for your FacultyKart account"],
 };
 
 export default function AuthPage({ forcedMode }) {
@@ -81,16 +81,16 @@ export default function AuthPage({ forcedMode }) {
     };
 
     // 1. BroadcastChannel: works across tabs/windows of the same origin even when COOP severs opener
-    const authChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("eduhire-auth") : null;
+    const authChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("facultykart-auth") : null;
     if (authChannel) {
       authChannel.onmessage = (e) => handleAuthMessage(e.data);
     }
 
     // 2. Token-free storage ping fallback: restores session from httpOnly cookie if BroadcastChannel was missed
     const handleStorage = async (e) => {
-      if (e.key === "eduhire_oauth_ping" && e.newValue && !oauthHandled.current) {
+      if (e.key === "facultykart_oauth_ping" && e.newValue && !oauthHandled.current) {
         try {
-          localStorage.removeItem("eduhire_oauth_ping");
+          localStorage.removeItem("facultykart_oauth_ping");
         } catch {}
         const result = await dispatch(bootstrapSession());
         if (bootstrapSession.fulfilled.match(result) && result.payload?.user && !oauthHandled.current) {
@@ -547,7 +547,7 @@ export default function AuthPage({ forcedMode }) {
             />
             {authMode === "login" && (
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", textAlign: "center", marginTop: "0.75rem" }}>
-                New to EduHire? You'll choose Teacher or Institute after Google sign-in.
+                New to FacultyKart? You'll choose Teacher or Institute after Google sign-in.
               </p>
             )}
           </div>

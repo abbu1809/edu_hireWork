@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
-import { ShieldCheck, Lock, Phone, FileText, X } from "lucide-react";
-import { closeCheckout, payForTeacherUnlock, selectCheckout, selectPaymentProcessing } from "../store/paymentSlice";
+import { ShieldCheck, Lock, Phone, FileText, X, CheckCircle, Sparkles } from "lucide-react";
+import { closeCheckout, payForTeacherUnlock, payForFacultyRegistration, selectCheckout, selectPaymentProcessing } from "../store/paymentSlice";
 import { usePaymentConfig } from "../hooks/usePaymentConfig";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { refreshCurrentUser } from "@/features/auth/store/authSlice";
@@ -22,10 +22,29 @@ export default function RazorpayModal() {
 
   if (!checkout) return null;
 
-  const fee = config?.unlockFee;
+  const isFacultyReg = checkout.type === "faculty_registration";
+  const fee = isFacultyReg ? (config?.facultyRegistrationFee || 9) : config?.unlockFee;
   const enabled = Boolean(config?.enabled);
 
   const handlePay = async () => {
+    if (isFacultyReg) {
+      const result = await dispatch(
+        payForFacultyRegistration({
+          customer: { name: currentUser?.name, email: currentUser?.email, phone: currentUser?.phone },
+        })
+      );
+      if (payForFacultyRegistration.fulfilled.match(result)) {
+        notify.success(`Payment of ${formatCurrency(result.payload.amount)} received! Your faculty profile is now activated. You can apply for all vacancies!`);
+        dispatch(refreshCurrentUser());
+        queryClient.invalidateQueries({ queryKey: ["teachers"] });
+        queryClient.invalidateQueries({ queryKey: ["myApplications"] });
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      } else if (!result.payload?.dismissed) {
+        notify.error(result.payload?.message || "Payment could not be completed.");
+      }
+      return;
+    }
+
     const result = await dispatch(
       payForTeacherUnlock({
         teacherId: checkout.teacherId,
@@ -62,12 +81,16 @@ export default function RazorpayModal() {
           >
             <ShieldCheck size={14} /> RAZORPAY SECURE
           </div>
-          <p className="mb-1 text-sm opacity-90">EduHire Bridge Mediator Services</p>
+          <p className="mb-1 text-sm opacity-90">
+            {isFacultyReg ? "FacultyKart Educator Verification" : "FacultyKart Mediator Services"}
+          </p>
           <h2 id="razorpay-title" className="text-3xl font-extrabold" style={{ color: "#fff" }}>
             {isLoading ? "…" : fee ? formatCurrency(fee) : "—"}
           </h2>
           <span className="text-sm" style={{ color: "var(--color-gold-light)" }}>
-            Unlock Contact & Resume: {checkout.teacherName}
+            {isFacultyReg
+              ? "One-Time Faculty Registration & Profile Activation Fee"
+              : `Unlock Contact & Resume: ${checkout.teacherName}`}
           </span>
         </div>
 
@@ -77,17 +100,31 @@ export default function RazorpayModal() {
             Paying as: <strong style={{ color: "var(--text-primary)" }}>{currentUser?.name || currentUser?.email}</strong>
           </div>
 
-          <ul className="mb-5 flex flex-col gap-2 rounded-card p-4 text-sm" style={{ background: "var(--color-canvas-warm)" }}>
-            <li className="flex items-center gap-2">
-              <Phone size={15} color="var(--color-brand-accent)" /> Direct phone number & email
-            </li>
-            <li className="flex items-center gap-2">
-              <FileText size={15} color="var(--color-brand-accent)" /> Full resume download
-            </li>
-            <li className="flex items-center gap-2">
-              <Lock size={15} color="var(--color-brand-accent)" /> Saved to your Unlocked Contacts
-            </li>
-          </ul>
+          {isFacultyReg ? (
+            <ul className="mb-5 flex flex-col gap-2 rounded-card p-4 text-sm" style={{ background: "var(--color-canvas-warm)" }}>
+              <li className="flex items-center gap-2">
+                <CheckCircle size={15} color="var(--color-brand-accent)" /> Apply to unlimited verified coaching & school vacancies
+              </li>
+              <li className="flex items-center gap-2">
+                <FileText size={15} color="var(--color-brand-accent)" /> 75%+ completed profile active & visible to recruiters
+              </li>
+              <li className="flex items-center gap-2">
+                <Sparkles size={15} color="var(--color-brand-accent)" /> Eligible for direct mediator recommendations & demo trial invites
+              </li>
+            </ul>
+          ) : (
+            <ul className="mb-5 flex flex-col gap-2 rounded-card p-4 text-sm" style={{ background: "var(--color-canvas-warm)" }}>
+              <li className="flex items-center gap-2">
+                <Phone size={15} color="var(--color-brand-accent)" /> Direct phone number & email
+              </li>
+              <li className="flex items-center gap-2">
+                <FileText size={15} color="var(--color-brand-accent)" /> Full resume download
+              </li>
+              <li className="flex items-center gap-2">
+                <Lock size={15} color="var(--color-brand-accent)" /> Saved to your Unlocked Contacts
+              </li>
+            </ul>
+          )}
 
           {!isLoading && !enabled && (
             <div

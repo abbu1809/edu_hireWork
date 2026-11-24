@@ -4,6 +4,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { teacherApi } from "../api/teacher.api";
 import { useDeleteDocument, useMyDocuments, useUpdateTeacherProfile, useUploadDocument } from "../hooks/useTeacher";
 import { DashboardHeader } from "@/shared/components/layout/DashboardLayout";
+import ProfileCompletionCard from "@/shared/components/ProfileCompletionCard";
 import QueryState from "@/shared/components/QueryState";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { notify } from "@/shared/utils/notify";
@@ -136,6 +137,13 @@ export default function TeacherProfilePage() {
   return (
     <div>
       <DashboardHeader title="Faculty Profile & KYC Documents" subtitle="Manage your verified educator credentials and resume documents" />
+
+      <ProfileCompletionCard
+        role="teacher"
+        percent={currentUser?.profile_completion_percent ?? 0}
+        missingItems={currentUser?.missing_profile_items || []}
+        actionUrl="/teacher/profile"
+      />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Left: Edit Profile Form */}
@@ -286,7 +294,7 @@ export default function TeacherProfilePage() {
                 </div>
                 <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
                   {verified
-                    ? "All degrees and background verified by EduHire mediators."
+                    ? "All degrees and background verified by FacultyKart mediators."
                     : currentUser?.verification_notes || "Upload your ID proof and degree certificates. Our team reviews documents within 24-48 hours."}
                 </div>
               </div>

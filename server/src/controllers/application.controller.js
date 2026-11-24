@@ -9,6 +9,7 @@ import {
 } from "../models/application.model.js";
 import { VacancyModel } from "../models/vacancy.model.js";
 import { TeacherModel } from "../models/teacher.model.js";
+import { PaymentModel } from "../models/payment.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { EmailService } from "../services/email/email.service.js";
 import { calculateProfileCompletion } from "../utils/profileCompletion.js";
@@ -70,6 +71,17 @@ export const ApplicationController = {
     if (completion.percent < 75) {
       throw ApiError.badRequest(
         `Profile incomplete (${completion.percent}%). Complete at least 75% of your profile before applying. Missing: ${completion.missingItems.join(", ")}.`
+      );
+    }
+
+    const hasPaidFee = Boolean(
+      teacher?.is_platform_fee_paid ||
+      teacher?.custom_fields?.is_platform_fee_paid ||
+      (await PaymentModel.hasCapturedPayment(req.db, req.user.id, "FACULTY_REGISTRATION"))
+    );
+    if (!hasPaidFee) {
+      throw ApiError.badRequest(
+        "One-time faculty registration fee (₹9) is required to activate your profile and apply for vacancies. Please pay the activation fee."
       );
     }
 

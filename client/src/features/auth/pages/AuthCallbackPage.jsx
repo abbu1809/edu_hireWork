@@ -40,7 +40,7 @@ export default function AuthCallbackPage() {
     // 1. BroadcastChannel: in-memory same-origin IPC (works even after COOP severs window.opener)
     try {
       if (typeof BroadcastChannel !== "undefined") {
-        channel = new BroadcastChannel("eduhire-auth");
+        channel = new BroadcastChannel("facultykart-auth");
         channel.postMessage(payload);
       }
     } catch {}
@@ -55,7 +55,7 @@ export default function AuthCallbackPage() {
     // 3. Token-free storage ping: nudges main window to restore session via httpOnly cookie
     if (payload.type === "oauth_success") {
       try {
-        localStorage.setItem("eduhire_oauth_ping", String(Date.now()));
+        localStorage.setItem("facultykart_oauth_ping", String(Date.now()));
       } catch {}
     }
 
@@ -96,7 +96,7 @@ export default function AuthCallbackPage() {
     setError(errMsg);
     if (isPopup) {
       try {
-        const channel = new BroadcastChannel("eduhire-auth");
+        const channel = new BroadcastChannel("facultykart-auth");
         channel.postMessage({ type: "oauth_error", message: errMsg });
         setTimeout(() => channel.close(), 150);
       } catch {}
@@ -172,7 +172,7 @@ export default function AuthCallbackPage() {
       <div className="card" style={{ maxWidth: "520px", width: "100%", padding: "clamp(1.5rem, 5vw, 2.5rem) clamp(1.25rem, 4vw, 2rem)" }}>
         <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
           <h1 className="serif-headline" style={{ fontSize: "1.85rem", color: "var(--color-brand-house)", marginBottom: "0.5rem" }}>
-            How will you use EduHire?
+            How will you use FacultyKart?
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.92rem" }}>
             {needsRole.name ? `Hi ${needsRole.name}, ` : ""}choose your account type to finish setting up{needsRole.email ? ` ${needsRole.email}` : ""}. This can't be changed later.

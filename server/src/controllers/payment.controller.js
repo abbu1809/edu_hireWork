@@ -19,6 +19,15 @@ export const PaymentController = {
     res.status(201).json({ success: true, data: order });
   }),
 
+  createFacultyRegistrationOrder: asyncHandler(async (req, res) => {
+    const order = await PaymentService.createFacultyRegistrationOrder({
+      db: req.db,
+      teacherId: req.user.id,
+      teacherName: req.user.name,
+    });
+    res.status(201).json({ success: true, data: order });
+  }),
+
   verify: asyncHandler(async (req, res) => {
     const { orderId, paymentId, signature } = req.body;
     if (!orderId || !paymentId || !signature) throw ApiError.badRequest("Incomplete payment confirmation.");

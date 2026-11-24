@@ -6,6 +6,7 @@ import { calculateProfileCompletion, calculateInstituteProfileCompletion } from 
 import { ProfileModel } from "../models/profile.model.js";
 import { TeacherModel } from "../models/teacher.model.js";
 import { InstituteModel } from "../models/institute.model.js";
+import { PaymentModel } from "../models/payment.model.js";
 import { StorageService } from "./storage.service.js";
 import { mailMode } from "../config/mailer.js";
 import { OtpService } from "./email/otp.service.js";
@@ -61,6 +62,11 @@ export const AuthService = {
       const comp = calculateProfileCompletion(merged);
       user.profile_completion_percent = comp.percent;
       user.missing_profile_items = comp.missingItems;
+      user.is_platform_fee_paid = Boolean(
+        extended.is_platform_fee_paid ||
+        extended.custom_fields?.is_platform_fee_paid ||
+        (await PaymentModel.hasCapturedPayment(serviceDb, authUser.id, "FACULTY_REGISTRATION"))
+      );
     } else if (role === "institute") {
       const comp = calculateInstituteProfileCompletion(merged);
       user.profile_completion_percent = comp.percent;

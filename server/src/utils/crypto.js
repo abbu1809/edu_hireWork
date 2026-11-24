@@ -12,9 +12,9 @@ const encryptionKey = (() => {
   if (raw) {
     const key = /^[0-9a-f]{64}$/i.test(raw) ? Buffer.from(raw, "hex") : Buffer.from(raw, "base64");
     if (key.length === 32) return key;
-    console.warn("[EduHire API] TOKEN_ENCRYPTION_KEY must be 32 bytes (64 hex chars or base64). Falling back to a derived key.");
+    console.warn("[FacultyKart API] TOKEN_ENCRYPTION_KEY must be 32 bytes (64 hex chars or base64). Falling back to a derived key.");
   }
-  return crypto.createHash("sha256").update(`eduhire-session-key:${config.supabase.serviceRoleKey}`).digest();
+  return crypto.createHash("sha256").update(`facultykart-session-key:${config.supabase.serviceRoleKey}`).digest();
 })();
 
 /** Encrypts a string → "v1.<iv>.<tag>.<ciphertext>" (base64url parts). */

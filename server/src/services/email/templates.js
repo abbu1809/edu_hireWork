@@ -72,7 +72,7 @@ const layout = ({ preheader = "", heading, body, footerNote = "" }) => `<!doctyp
     <tr><td align="center" style="padding:24px 12px;">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;">
         <tr><td style="background:${BRAND.house};border-radius:12px 12px 0 0;padding:20px 28px;">
-          <a href="${appUrl("/")}" style="text-decoration:none;font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">EduHire <span style="color:${BRAND.gold};">Bridge</span></a>
+          <a href="${appUrl("/")}" style="text-decoration:none;font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">Faculty <span style="color:${BRAND.gold};">Kart</span></a>
         </td></tr>
         <tr><td style="background:#ffffff;padding:32px 28px 12px;border-radius:0 0 12px 12px;">
           <h1 style="margin:0 0 18px;font-size:22px;line-height:1.3;color:${BRAND.green};font-weight:700;">${escapeHtml(heading)}</h1>
@@ -80,7 +80,7 @@ const layout = ({ preheader = "", heading, body, footerNote = "" }) => `<!doctyp
         </td></tr>
         <tr><td style="padding:20px 28px;text-align:center;font-size:12px;line-height:1.6;color:${BRAND.muted};">
           ${footerNote ? `${footerNote}<br>` : ""}
-          EduHire Bridge · Verified faculty hiring for IIT-JEE, NEET &amp; schools across India<br>
+          FacultyKart · Verified faculty hiring for IIT-JEE, NEET &amp; schools across India<br>
           <a href="${appUrl("/privacy")}" style="color:${BRAND.muted};">Privacy</a> · <a href="${appUrl("/contact")}" style="color:${BRAND.muted};">Contact support</a>
         </td></tr>
       </table>
@@ -89,21 +89,21 @@ const layout = ({ preheader = "", heading, body, footerNote = "" }) => `<!doctyp
 </body>
 </html>`;
 
-const textFooter = (note = "") => `\n\n—\n${note ? `${note}\n` : ""}EduHire Bridge · ${appUrl("/")}`;
+const textFooter = (note = "") => `\n\n—\n${note ? `${note}\n` : ""}FacultyKart · ${appUrl("/")}`;
 
 const firstName = (name) => (name ? String(name).trim().split(/\s+/)[0] : "there");
 
 const PURPOSE_COPY = {
-  SIGNUP: { title: "Verify your email", action: "finish creating your EduHire Bridge account" },
+  SIGNUP: { title: "Verify your email", action: "finish creating your FacultyKart account" },
   EMAIL_CHANGE: { title: "Confirm your new email", action: "confirm your new email address" },
-  LOGIN: { title: "Your sign-in code", action: "sign in to EduHire Bridge" },
+  LOGIN: { title: "Your sign-in code", action: "sign in to FacultyKart" },
 };
 
 // ---------------------------------------------------------------------------
 export const templates = {
   otp: ({ code, purpose = "SIGNUP", minutes }) => {
     const copy = PURPOSE_COPY[purpose] || PURPOSE_COPY.SIGNUP;
-    const subject = `${code} is your EduHire Bridge verification code`;
+    const subject = `${code} is your FacultyKart verification code`;
     const html = layout({
       preheader: `Use ${code} to ${copy.action}. Expires in ${minutes} minutes.`,
       heading: copy.title,
@@ -111,7 +111,7 @@ export const templates = {
         <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:${BRAND.text};">Use this code to ${escapeHtml(copy.action)}:</p>
         <div style="margin:0 0 20px;padding:18px;text-align:center;background:${BRAND.canvas};border-radius:10px;font-family:'Courier New',monospace;font-size:34px;font-weight:700;letter-spacing:10px;color:${BRAND.house};">${escapeHtml(code)}</div>
         <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.muted};">The code expires in ${minutes} minutes. If you didn't request it, you can safely ignore this email — nobody can use it without access to your inbox.</p>`,
-      footerNote: "You received this because someone entered your address on EduHire Bridge.",
+      footerNote: "You received this because someone entered your address on FacultyKart.",
     });
     const text = `${copy.title}\n\nYour code: ${code}\n\nUse it to ${copy.action}. It expires in ${minutes} minutes. If you didn't request it, ignore this email.${textFooter()}`;
     return { subject, html, text };
@@ -120,7 +120,7 @@ export const templates = {
   welcome: ({ name, role }) => {
     const isInstitute = role === "institute";
     const path = isInstitute ? "/institute" : "/teacher";
-    const subject = `Welcome to EduHire Bridge, ${firstName(name)}!`;
+    const subject = `Welcome to FacultyKart, ${firstName(name)}!`;
     const steps = isInstitute
       ? ["Complete your institute profile", "Post your first teaching vacancy", "Shortlist applicants and schedule demo lectures"]
       : ["Complete your profile and add a headline", "Upload your resume, ID proof and degree certificates", "Apply to verified coaching & school vacancies — free"];
@@ -130,7 +130,7 @@ export const templates = {
       body: `
         ${paragraphs(
           isInstitute
-            ? "Your institute account is ready. EduHire Bridge helps you hire KYC-verified IIT-JEE, NEET and school faculty with demo lectures and a simple applicant pipeline."
+            ? "Your institute account is ready. FacultyKart helps you hire KYC-verified IIT-JEE, NEET and school faculty with demo lectures and a simple applicant pipeline."
             : "Your teacher account is ready. Verified profiles get up to 4x more interview invitations from coaching institutes and schools."
         )}
         <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:${BRAND.text};">Your next steps</p>
@@ -144,14 +144,14 @@ export const templates = {
   },
 
   loginAlert: ({ name, time, ip, userAgent }) => {
-    const subject = `Security Alert: Successful sign-in to your EduHire account`;
+    const subject = `Security Alert: Successful sign-in to your FacultyKart account`;
     const formattedTime = time || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
     const html = layout({
-      preheader: `A new sign-in was detected on your EduHire account.`,
+      preheader: `A new sign-in was detected on your FacultyKart account.`,
       heading: `New sign-in detected`,
       body: `
         <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:${BRAND.text};">Hello ${escapeHtml(firstName(name))},</p>
-        <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:${BRAND.text};">We noticed a successful login to your EduHire account on <strong>${escapeHtml(formattedTime)}</strong>.</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:${BRAND.text};">We noticed a successful login to your FacultyKart account on <strong>${escapeHtml(formattedTime)}</strong>.</p>
         ${detailsTable([
           ["Time", formattedTime],
           ["Device", userAgent ? escapeHtml(userAgent.substring(0, 80)) : "Web Browser"],
@@ -161,12 +161,12 @@ export const templates = {
         ${button("Open My Dashboard", appUrl("/"))}`,
       footerNote: "You received this security notice because your account was accessed.",
     });
-    const text = `Hello ${firstName(name)},\n\nA successful login to your EduHire account was detected at ${formattedTime}.\n\nIf this was not you, please secure your account immediately.\n\n${textFooter()}`;
+    const text = `Hello ${firstName(name)},\n\nA successful login to your FacultyKart account was detected at ${formattedTime}.\n\nIf this was not you, please secure your account immediately.\n\n${textFooter()}`;
     return { subject, html, text };
   },
 
   subscribeConfirm: ({ name, unsubscribeUrl }) => {
-    const subject = "You're subscribed to EduHire Bridge updates";
+    const subject = "You're subscribed to FacultyKart updates";
     const html = layout({
       preheader: "Hiring trends, teaching jobs and career guides — straight to your inbox.",
       heading: `Thanks for subscribing${name ? `, ${firstName(name)}` : ""}!`,
@@ -263,7 +263,7 @@ export const templates = {
 
   verificationDecision: ({ name, approved, reason, role }) => {
     const url = appUrl(role === "institute" ? "/institute/profile" : "/teacher/profile");
-    const subject = approved ? "Your EduHire Bridge profile is verified" : "Action needed: verification update";
+    const subject = approved ? "Your FacultyKart profile is verified" : "Action needed: verification update";
     const html = layout({
       preheader: approved ? "You now have the Verified badge." : "Please review the note and update your documents.",
       heading: approved ? "You're verified!" : "We couldn't verify your profile yet",
@@ -304,7 +304,7 @@ export const templates = {
 
   matchRecommendation: ({ name, message, path }) => {
     const url = appUrl(path || "/");
-    const subject = "EduHire Bridge has a recommendation for you";
+    const subject = "FacultyKart has a recommendation for you";
     const html = layout({
       preheader: message,
       heading: "A hand-picked recommendation",
@@ -315,12 +315,12 @@ export const templates = {
   },
 
   passwordChanged: ({ name }) => {
-    const subject = "Your EduHire Bridge password was changed";
+    const subject = "Your FacultyKart password was changed";
     const html = layout({
       preheader: "If this wasn't you, reset your password now.",
       heading: "Password changed",
       body: `
-        ${paragraphs(`Hi ${firstName(name)}, the password for your EduHire Bridge account was just changed.\n\nIf you made this change, no action is needed. If you didn't, reset your password immediately and contact support.`)}
+        ${paragraphs(`Hi ${firstName(name)}, the password for your FacultyKart account was just changed.\n\nIf you made this change, no action is needed. If you didn't, reset your password immediately and contact support.`)}
         ${button("Reset password", appUrl("/auth?mode=forgot"))}`,
       footerNote: "This is a security notification and can't be turned off.",
     });
@@ -329,7 +329,7 @@ export const templates = {
   },
 
   inquiryAck: ({ name }) => {
-    const subject = "We received your message — EduHire Bridge";
+    const subject = "We received your message — FacultyKart";
     const html = layout({
       preheader: "Our team will reply within 4 business hours.",
       heading: `Thanks, ${firstName(name)} — we're on it`,
@@ -355,9 +355,9 @@ export const templates = {
 
   broadcast: ({ name, subject, message, ctaLabel, ctaUrl, unsubscribeUrl, preferencesUrl }) => {
     const optOut = unsubscribeUrl
-      ? `You're receiving this as an EduHire Bridge subscriber. <a href="${escapeHtml(unsubscribeUrl)}" style="color:${BRAND.muted};">Unsubscribe</a>.`
+      ? `You're receiving this as an FacultyKart subscriber. <a href="${escapeHtml(unsubscribeUrl)}" style="color:${BRAND.muted};">Unsubscribe</a>.`
       : preferencesUrl
-        ? `You're receiving this as an EduHire Bridge member. <a href="${escapeHtml(preferencesUrl)}" style="color:${BRAND.muted};">Email preferences</a>.`
+        ? `You're receiving this as an FacultyKart member. <a href="${escapeHtml(preferencesUrl)}" style="color:${BRAND.muted};">Email preferences</a>.`
         : "";
     const html = layout({
       preheader: String(message).slice(0, 120),

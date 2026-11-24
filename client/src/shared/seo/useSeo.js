@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router";
 
-export const SITE_URL = (import.meta.env.VITE_SITE_URL || "https://eduhirebridge.in").replace(/\/$/, "");
-export const SITE_NAME = "EduHire Bridge";
+export const SITE_URL = (import.meta.env.VITE_SITE_URL || "https://facultykart.in").replace(/\/$/, "");
+export const SITE_NAME = "FacultyKart";
 const DEFAULT_DESCRIPTION =
-  "Post verified coaching and school faculty vacancies, or apply as a KYC-checked JEE/NEET educator. Demo lectures, shortlists, and direct offers — built for Indian institutes.";
+  "FacultyKart is India's premier faculty hiring marketplace. Connect top coaching institutes and schools with KYC-verified teachers for IIT-JEE, NEET, Foundation and K-12.";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 const upsertMeta = (attr, key, content) => {

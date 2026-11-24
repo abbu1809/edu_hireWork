@@ -1,9 +1,11 @@
 import { Link } from "react-router";
+import { useDispatch } from "react-redux";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useApplyToVacancy, useMyApplications } from "@/features/teacher/hooks/useTeacher";
+import { openFacultyCheckout } from "@/features/payments/store/paymentSlice";
 import { notify } from "@/shared/utils/notify";
 import { useThrottledCallback } from "@/shared/hooks/useThrottledCallback";
-import { CheckCircle2, ShieldAlert } from "lucide-react";
+import { CheckCircle2, ShieldAlert, Sparkles } from "lucide-react";
 
 /**
  * Apply action that adapts to who is looking: guests are sent to sign-up,
@@ -11,6 +13,7 @@ import { CheckCircle2, ShieldAlert } from "lucide-react";
  * Requires at least 75% profile completion for teachers.
  */
 export default function ApplyButton({ vacancy, label = "Submit Application" }) {
+  const dispatch = useDispatch();
   const { currentUser, role } = useAuth();
   const isTeacher = role === "teacher";
   const { data: applications = [] } = useMyApplications({ enabled: isTeacher });
@@ -18,6 +21,7 @@ export default function ApplyButton({ vacancy, label = "Submit Application" }) {
 
   const completionPercent = currentUser?.profile_completion_percent ?? 0;
   const isUnderThreshold = isTeacher && completionPercent < 75;
+  const isPlatformFeePaid = Boolean(currentUser?.is_platform_fee_paid);
 
   const handleApply = useThrottledCallback(() => {
     if (isUnderThreshold) {
@@ -25,6 +29,11 @@ export default function ApplyButton({ vacancy, label = "Submit Application" }) {
       notify.error(
         `Profile is only ${completionPercent}% complete. Complete at least 75% of your profile before applying. Missing: ${missing || "required details"}.`
       );
+      return;
+    }
+    if (isTeacher && !isPlatformFeePaid) {
+      notify.info("Please pay the one-time ₹9 faculty activation fee to apply for vacancies.");
+      dispatch(openFacultyCheckout());
       return;
     }
     apply.mutate(vacancy.id, {
@@ -65,6 +74,20 @@ export default function ApplyButton({ vacancy, label = "Submit Application" }) {
       >
         <ShieldAlert size={14} /> Profile {completionPercent}% (75% Req)
       </Link>
+    );
+  }
+
+  if (!isUnderThreshold && !alreadyApplied && !isPlatformFeePaid) {
+    return (
+      <button
+        type="button"
+        className="btn btn-primary"
+        style={{ width: "100%", display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "0.4rem", background: "linear-gradient(135deg, #00754a, #005a38)" }}
+        onClick={() => dispatch(openFacultyCheckout())}
+        title="Pay one-time ₹9 platform activation fee to apply"
+      >
+        <Sparkles size={15} /> Pay ₹9 to Activate & Apply
+      </button>
     );
   }
 

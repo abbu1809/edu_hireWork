@@ -1,7 +1,7 @@
+# Robots.txt for FacultyKart (https://facultykart.in)
 User-agent: *
 Allow: /
-# Private portals and account flows ($ = exact match, so /teacher-updates and
-# /institute-updates / /institutes stay crawlable)
+# Private portals and account flows ($ = exact match)
 Disallow: /teacher$
 Disallow: /teacher/
 Disallow: /institute$
@@ -12,4 +12,29 @@ Disallow: /notifications
 Disallow: /unsubscribe
 Disallow: /api/
 
-Sitemap: https://eduhirebridge.in/sitemap.xml
+# Answer Engine Optimization (AEO) - Allow AI search engines to index public information
+User-agent: GPTBot
+Allow: /
+Disallow: /teacher/
+Disallow: /institute/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /teacher/
+Disallow: /institute/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /teacher/
+Disallow: /institute/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://facultykart.in/sitemap.xml

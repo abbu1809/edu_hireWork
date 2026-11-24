@@ -35,13 +35,13 @@ export default function UnsubscribePage() {
         </h1>
         <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>
           {ok
-            ? `${unsubscribe.data?.data?.email || "Your address"} will no longer receive EduHire Bridge newsletters. Account emails (applications, demos, payments) are not affected.`
+            ? `${unsubscribe.data?.data?.email || "Your address"} will no longer receive FacultyKart newsletters. Account emails (applications, demos, payments) are not affected.`
             : token
               ? getErrorMessage(unsubscribe.error, "This unsubscribe link is invalid or has expired.")
               : "This unsubscribe link is missing its token. Please use the link from your email."}
         </p>
         <Link to="/" className="btn btn-primary">
-          Back to EduHire Bridge
+          Back to FacultyKart
         </Link>
       </div>
     </div>

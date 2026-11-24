@@ -18,7 +18,7 @@ const VERIFIED_VALID_MINUTES = 30;
 // Codes are stored only as salted hashes; the salt is derived from a server secret.
 const pepper = crypto
   .createHash("sha256")
-  .update(`eduhire-otp:${process.env.OTP_SECRET || config.supabase.serviceRoleKey}`)
+  .update(`facultykart-otp:${process.env.OTP_SECRET || config.supabase.serviceRoleKey}`)
   .digest("hex");
 
 const hashCode = (email, purpose, code) =>

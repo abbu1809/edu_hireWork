@@ -78,7 +78,7 @@ export const BlogController = {
     const post = await BlogModel.create(req.db, {
       ...payload,
       author_id: req.user.id,
-      author_name: payload.author_name || req.user.name || "EduHire Editorial",
+      author_name: payload.author_name || req.user.name || "FacultyKart Editorial",
       status: payload.status || "published",
       published_at: payload.status === "draft" ? null : payload.published_at || new Date().toISOString(),
     });

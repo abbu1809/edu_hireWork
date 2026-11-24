@@ -66,7 +66,7 @@ export default function AdminGovernancePage() {
               <label className="form-label" htmlFor="bc-title">
                 Title (optional)
               </label>
-              <input id="bc-title" type="text" className="input-field" placeholder="Announcement from EduHire Bridge" value={title} onChange={(e) => setTitle(e.target.value)} />
+              <input id="bc-title" type="text" className="input-field" placeholder="Announcement from FacultyKart" value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
 
             <div className="form-group">

@@ -8,8 +8,10 @@ import { InstituteModel } from "../models/institute.model.js";
 import { TeacherModel } from "../models/teacher.model.js";
 import { NotificationService } from "./notification.service.js";
 import { EmailService } from "./email/email.service.js";
+import { calculateProfileCompletion } from "../utils/profileCompletion.js";
 
 const PURPOSE_UNLOCK = "TEACHER_UNLOCK";
+const PURPOSE_FACULTY_REGISTRATION = "FACULTY_REGISTRATION";
 
 const ensureConfigured = () => {
   if (!isRazorpayConfigured() || !razorpay) {
@@ -53,6 +55,58 @@ const fulfil = async (payment) => {
         )
       );
     }
+  } else if (payment?.purpose_type === PURPOSE_FACULTY_REGISTRATION && payment.payer_id) {
+    try {
+      await serviceDb
+        .from("teachers")
+        .update({
+          is_platform_fee_paid: true,
+          platform_fee_paid_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", payment.payer_id);
+    } catch (e) {
+      console.warn("Direct update on is_platform_fee_paid failed, attempting custom_fields fallback:", e?.message);
+    }
+
+    try {
+      const teacher = await TeacherModel.findById(serviceDb, payment.payer_id);
+      const custom = teacher?.custom_fields || {};
+      await serviceDb
+        .from("teachers")
+        .update({
+          custom_fields: { ...custom, is_platform_fee_paid: true, platform_fee_paid_at: new Date().toISOString() },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", payment.payer_id);
+    } catch {}
+
+    await NotificationService.notify({
+      userId: payment.payer_id,
+      title: "🎉 Profile Activated!",
+      message: `Your one-time faculty registration fee of ₹${payment.amount} has been received. You can now apply for all verified vacancies!`,
+      type: "PAYMENT",
+      link: "/teacher/jobs",
+    });
+
+    if (!receiptSent.has(payment.order_id)) {
+      receiptSent.add(payment.order_id);
+      EmailService.background(
+        EmailService.sendToUser(
+          payment.payer_id,
+          "paymentReceipt",
+          {
+            amount: payment.amount,
+            purpose: payment.purpose,
+            paymentId: payment.payment_id,
+            orderId: payment.order_id,
+            method: payment.method,
+            date: new Date(payment.captured_at || Date.now()).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }),
+          },
+          { preference: null }
+        )
+      );
+    }
   }
 };
 
@@ -65,6 +119,7 @@ export const PaymentService = {
       keyId: isRazorpayConfigured() ? config.razorpay.keyId : null,
       currency: "INR",
       unlockFee: config.pricing.instituteUnlockFee,
+      facultyRegistrationFee: config.pricing.facultyRegistrationFee || 9,
     };
   },
 
@@ -108,6 +163,58 @@ export const PaymentService = {
       keyId: config.razorpay.keyId,
       purpose,
       teacherName: teacher.name,
+    };
+  },
+
+  /** Creates a Razorpay order for faculty registration fee (₹9). */
+  async createFacultyRegistrationOrder({ db, teacherId, teacherName }) {
+    ensureConfigured();
+
+    const teacher = await TeacherModel.findById(serviceDb, teacherId);
+    if (!teacher) throw ApiError.notFound("Teacher profile not found.");
+
+    const completion = calculateProfileCompletion(teacher);
+    if (completion.percent < 75) {
+      throw ApiError.badRequest(
+        `Profile is only ${completion.percent}% complete. Complete at least 75% of your profile before paying the activation fee. Missing: ${completion.missingItems.join(", ")}.`
+      );
+    }
+
+    const alreadyPaid =
+      Boolean(teacher.is_platform_fee_paid || teacher.custom_fields?.is_platform_fee_paid) ||
+      (await PaymentModel.hasCapturedPayment(serviceDb, teacherId, PURPOSE_FACULTY_REGISTRATION));
+    if (alreadyPaid) {
+      throw ApiError.conflict("You have already paid the one-time registration fee.");
+    }
+
+    const amount = config.pricing.facultyRegistrationFee || 9;
+    const order = await razorpay.orders.create({
+      amount: Math.round(amount * 100),
+      currency: "INR",
+      receipt: `fac_reg_${Date.now()}`,
+      notes: { purpose_type: PURPOSE_FACULTY_REGISTRATION, teacher_id: teacherId },
+    });
+
+    const purpose = "Faculty Registration Fee (One-Time Activation)";
+    await PaymentModel.create(db, {
+      id: order.id,
+      order_id: order.id,
+      payer_id: teacherId,
+      payer_name: teacherName || teacher.name,
+      purpose,
+      purpose_type: PURPOSE_FACULTY_REGISTRATION,
+      target_id: teacherId,
+      amount,
+      currency: "INR",
+      status: "CREATED",
+    });
+
+    return {
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: config.razorpay.keyId,
+      purpose,
     };
   },
 

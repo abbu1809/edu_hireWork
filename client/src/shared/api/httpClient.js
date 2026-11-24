@@ -17,7 +17,7 @@ export const http = axios.create({
 // ---------------------------------------------------------------------------
 // Cross-tab coordination: logout in one tab signs out the others.
 // ---------------------------------------------------------------------------
-const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("eduhire-auth") : null;
+const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("facultykart-auth") : null;
 let onRemoteLogout = () => {};
 let onSessionExpired = () => {};
 
@@ -96,7 +96,7 @@ const runRefresh = async () => {
  */
 export const refreshAccessToken = () => {
   if (!refreshPromise) {
-    const task = typeof navigator !== "undefined" && navigator.locks ? () => navigator.locks.request("eduhire-auth-refresh", runRefresh) : runRefresh;
+    const task = typeof navigator !== "undefined" && navigator.locks ? () => navigator.locks.request("facultykart-auth-refresh", runRefresh) : runRefresh;
     refreshPromise = task().finally(() => {
       refreshPromise = null;
     });
@@ -151,9 +151,9 @@ export const getErrorMessage = (error, fallback = "Something went wrong. Please 
   if (error?.response?.data?.message) return error.response.data.message;
   // The dev proxy answers 500/502/504 with no JSON body when the API isn't running.
   if (error?.response && error.response.status >= 500 && typeof error.response.data !== "object") {
-    return "The EduHire server isn't responding. Make sure the API is running and try again.";
+    return "The FacultyKart server isn't responding. Make sure the API is running and try again.";
   }
   if (error?.code === "ECONNABORTED") return "The server took too long to respond. Please try again.";
-  if (error?.message === "Network Error") return "Cannot reach the EduHire server. Check your connection and try again.";
+  if (error?.message === "Network Error") return "Cannot reach the FacultyKart server. Check your connection and try again.";
   return error?.message || fallback;
 };

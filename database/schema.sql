@@ -94,6 +94,8 @@ CREATE TABLE IF NOT EXISTS public.teachers (
   "references" JSONB DEFAULT '[]'::jsonb,
   profile_completion_percent INTEGER DEFAULT 35,
   profile_completion_percentage NUMERIC(5, 2) DEFAULT 0,
+  is_platform_fee_paid BOOLEAN NOT NULL DEFAULT FALSE,
+  platform_fee_paid_at TIMESTAMPTZ,
   verified BOOLEAN NOT NULL DEFAULT FALSE,
   premium_badge BOOLEAN NOT NULL DEFAULT FALSE,
   rating NUMERIC(3,2) DEFAULT 5.0,
@@ -732,8 +734,8 @@ BEGIN
     END IF;
   END IF;
 
-  -- Automatically assign ADMIN role for admin@eduhirebridge.in
-  IF v_norm_email = 'admin@eduhirebridge.in' THEN
+  -- Automatically assign ADMIN role for facultykart@gmail.com
+  IF v_norm_email IN ('facultykart@gmail.com', 'admin@facultykart.in') THEN
     v_role := 'ADMIN';
   ELSE
     v_role := UPPER(COALESCE(NEW.raw_user_meta_data->>'role', 'TEACHER'));
@@ -1541,7 +1543,7 @@ CREATE TABLE IF NOT EXISTS public.blog_posts (
   category TEXT NOT NULL DEFAULT 'Career Guidance',
   tags TEXT[] NOT NULL DEFAULT '{}',
   author_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-  author_name TEXT NOT NULL DEFAULT 'EduHire Editorial Board',
+  author_name TEXT NOT NULL DEFAULT 'FacultyKart Editorial Board',
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'scheduled', 'archived')),
   featured BOOLEAN NOT NULL DEFAULT FALSE,
   views_count INTEGER NOT NULL DEFAULT 0,

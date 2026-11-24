@@ -19,7 +19,7 @@ export default function Footer() {
                 <GraduationCap size={18} aria-hidden="true" />
               </div>
               <div style={{ fontSize: "1.25rem", fontWeight: "800", color: "var(--color-surface-white)" }}>
-                EduHire <span style={{ color: "var(--color-gold)" }}>Bridge</span>
+                Faculty<span style={{ color: "var(--color-gold)" }}>Kart</span>
               </div>
             </Link>
             <p style={{ color: "var(--text-on-dark-muted)", fontSize: "0.9rem", lineHeight: "1.6", maxWidth: "340px", marginBottom: "1.25rem" }}>
@@ -57,7 +57,7 @@ export default function Footer() {
           <div className="footer-col">
             <h4>Platform & Legal</h4>
             <ul>
-              <li><Link to="/about">About EduHire Bridge</Link></li>
+              <li><Link to="/about">About FacultyKart</Link></li>
               <li><Link to="/institutes">Partner Institutes</Link></li>
               <li><Link to="/blog">Educational Blog</Link></li>
               <li><Link to="/contact">Contact Support</Link></li>
@@ -70,21 +70,21 @@ export default function Footer() {
 
         {/* Footer Bottom Bar */}
         <div className="footer-bottom">
-          <div>© {new Date().getFullYear()} EduHire Bridge. All rights reserved. Regional Hubs: Kota · Delhi NCR · Bangalore · Hyderabad.</div>
-          <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
+          <div>© {new Date().getFullYear()} FacultyKart. All rights reserved. Regional Hubs: Kota · Delhi NCR · Bangalore · Hyderabad.</div>
+          <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
             <Link to="/privacy">Privacy Policy</Link>
             <span>•</span>
             <Link to="/terms">Terms of Service</Link>
             <span>•</span>
             <Link to="/disclaimer">Disclaimer</Link>
-            {contactEmail && (
-              <>
-                <span>•</span>
-                <a href={`mailto:${contactEmail}`} style={{ color: "var(--color-gold)" }}>
-                  {contactEmail}
-                </a>
-              </>
-            )}
+            <span>•</span>
+            <a href="mailto:contact@facultykart.in" style={{ color: "var(--color-gold)" }}>
+              contact@facultykart.in
+            </a>
+            <span>•</span>
+            <a href="mailto:info@facultykart.in" style={{ color: "var(--color-gold)" }}>
+              info@facultykart.in
+            </a>
           </div>
         </div>
       </div>

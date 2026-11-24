@@ -33,7 +33,7 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 if (config.nodeEnv !== "production") app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
-  res.json({ success: true, message: "EduHire Bridge API is running.", health: "/api/health" });
+  res.json({ success: true, message: "FacultyKart API is running.", health: "/api/health" });
 });
 
 app.use("/api", apiRouter);

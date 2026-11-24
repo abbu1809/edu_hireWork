@@ -3,6 +3,7 @@ import { http, unwrap } from "@/shared/api/httpClient";
 export const paymentsApi = {
   config: () => unwrap(http.get("/payments/config")),
   createUnlockOrder: (teacherId) => unwrap(http.post("/payments/unlock-order", { teacherId })),
+  createFacultyRegistrationOrder: () => unwrap(http.post("/payments/faculty-registration-order")),
   verify: ({ orderId, paymentId, signature }) => unwrap(http.post("/payments/verify", { orderId, paymentId, signature })),
   listMine: () => unwrap(http.get("/payments/mine")),
 };

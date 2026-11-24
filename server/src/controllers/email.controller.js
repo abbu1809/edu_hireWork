@@ -71,8 +71,8 @@ export const EmailController = {
     if (!isValidEmail(to)) throw ApiError.badRequest("Please enter a valid email address.");
     const result = await EmailService.sendNow(to, "broadcast", {
       name: req.user.name,
-      subject: "EduHire Bridge test email",
-      message: "This is a test email from your EduHire Bridge admin panel. If you can read this, email delivery is working.",
+      subject: "FacultyKart test email",
+      message: "This is a test email from your FacultyKart admin panel. If you can read this, email delivery is working.",
     });
     if (!result.ok) throw ApiError.unavailable(result.skipped ? "SMTP is not configured on the server." : `Sending failed: ${result.error}`);
     res.json({ success: true, message: `Test email sent to ${to}.` });

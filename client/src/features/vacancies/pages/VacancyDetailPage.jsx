@@ -16,7 +16,7 @@ export default function VacancyDetailPage() {
   useSeo({
     title: vacancy ? `${vacancy.title} — ${vacancy.institute_name}, ${vacancy.city}` : "Vacancy",
     description: vacancy
-      ? vacancy.description || `${vacancy.subject} teaching vacancy at ${vacancy.institute_name}, ${vacancy.city}. Salary ${vacancy.salary_range}. Apply free on EduHire Bridge.`
+      ? vacancy.description || `${vacancy.subject} teaching vacancy at ${vacancy.institute_name}, ${vacancy.city}. Salary ${vacancy.salary_range}. Apply free on FacultyKart.`
       : undefined,
     path: `/careers/${id}`,
     noindex: isError,

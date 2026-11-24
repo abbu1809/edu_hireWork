@@ -1,10 +1,10 @@
-# EduHire Platform — Project Guide
+# FacultyKart Platform — Project Guide
 
 _Last updated: 2026-10-04 (v2 restructure)_
 
 ## 1. Overview
 
-EduHire Bridge is a hiring marketplace that connects teachers with coaching institutes and schools in India (IIT-JEE, NEET, K-12).
+FacultyKart is a hiring marketplace that connects teachers with coaching institutes and schools in India (IIT-JEE, NEET, K-12).
 
 - A **teacher** signs up, builds a profile, uploads a resume and KYC documents, and applies to vacancies.
 - An **institute** posts vacancies, browses the talent pool, moves applicants through an ATS pipeline, schedules demo lectures and pays (Razorpay) to **unlock** a teacher's phone, email and resume.
@@ -175,10 +175,10 @@ Code lives in `server/src/services/email/`: templates, the send queue, OTP, subs
 | --- | --- | --- |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase → Project Settings → API. The server will not start without them. |
 | `PORT`, `NODE_ENV`, `CLIENT_URL` | — | `CLIENT_URL` is used for CORS and auth redirects (default `http://localhost:3000`) |
-| `ADMIN_EMAIL` | — | The single admin account (default `admin@eduhirebridge.in`) |
+| `ADMIN_EMAIL` | — | The single admin account (default `admin@facultykart.in`) |
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | For payments | Without them, the unlock button shows "payments not configured" |
 | `RAZORPAY_WEBHOOK_SECRET` | Recommended | Webhook URL: `<server>/api/payments/webhook` |
-| `INSTITUTE_UNLOCK_FEE` | — | INR, default 499 |
+| `INSTITUTE_UNLOCK_FEE` | — | INR, default 49 |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` | For email | Any SMTP provider. For Gmail, use an App Password. |
 | `FROM_EMAIL`, `FROM_NAME`, `REPLY_TO_EMAIL` | — | Sender identity. Use a domain with SPF/DKIM set up. |
 | `ADMIN_NOTIFY_EMAIL` | — | Receives contact-form copies (defaults to `ADMIN_EMAIL`) |

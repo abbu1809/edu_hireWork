@@ -1,7 +1,7 @@
 {
-  "name": "eduhire-server",
+  "name": "facultykart-server",
   "version": "2.0.0",
-  "description": "EduHire Bridge REST API (Express, MVC) backed by Supabase Postgres, Auth and Storage",
+  "description": "FacultyKart REST API (Express, MVC) backed by Supabase Postgres, Auth and Storage",
   "main": "server.js",
   "type": "module",
   "engines": {

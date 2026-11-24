@@ -1,31 +1,36 @@
-# EduHire Bridge
+# FacultyKart
 
-> EduHire Bridge is an Indian faculty-hiring platform that connects coaching institutes, schools and junior colleges with KYC-verified teachers for IIT-JEE, NEET, Foundation/Olympiad and K-12 (CBSE/ICSE/State board) roles.
+> FacultyKart (https://facultykart.in) is India's premier faculty hiring and recruitment marketplace. It connects coaching institutes, test-prep academies, schools, and colleges with KYC-verified teaching professionals for IIT-JEE, NEET, Foundation, Olympiads, and K-12 (CBSE, ICSE, State Boards).
 
-## What it does
-- Institutes post teaching vacancies (subject, classes/exams, board, salary, city, urgency) and track applicants in an ATS pipeline: Applied → Under Review → Shortlisted → Interview/Demo → Selected/Rejected.
-- Teachers create a profile, upload a resume, ID proof and degree certificates, and apply to vacancies for free.
-- Institutes schedule whiteboard demo lectures (date, time, topic, meeting link) with shortlisted applicants.
-- Teacher phone numbers, emails and resumes are masked until an institute pays a one-time fee (default ₹49, via Razorpay) to unlock that profile.
-- An admin team verifies teacher and institute documents and awards a Verified badge, usually within 24–48 hours.
+## What FacultyKart Does
+- **For Institutes:** Coaching institutes post teaching vacancies with specific subjects, batches, exams, board, expected salary, and urgency. Institutes manage candidates through a structured ATS pipeline: Applied → Under Review → Shortlisted → Interview / Demo → Selected / Rejected.
+- **For Teachers:** Educators create detailed profiles, upload resumes, academic credentials, and demo video lectures, and apply to vacancies 100% free of charge.
+- **Whiteboard Trial Lectures:** Institutes schedule video whiteboard demo lectures directly through the platform (specifying date, time, topic, and meeting link).
+- **Privacy-First Unlocking:** Teacher phone numbers, email addresses, and original CVs remain masked until an institute pays a nominal one-time unlock fee (₹49 via Razorpay).
+- **Credential Verification:** A human moderation and background-check team audits teacher degrees, experience letters, and IDs, awarding the Verified Faculty badge within 24–48 hours.
 
-## Key facts
-- Free for teachers. Institutes pay only to unlock a teacher's direct contact and resume.
-- Coverage: all of India; most activity in Kota, Delhi NCR, Bangalore and Hyderabad.
-- Subjects: Physics, Chemistry, Mathematics, Biology, English, Social Science and more.
+## Key Facts
+- **Website & Domain:** https://facultykart.in
+- **Pricing:** Free for teachers. Institutes pay only ₹49 per candidate profile unlock.
+- **Coverage Hubs:** All over India, with major recruitment activity in Kota, Delhi NCR, Bangalore, Hyderabad, Jaipur, Pune, and Lucknow.
+- **Academic Subjects:** Physics, Chemistry, Mathematics, Biology (Botany & Zoology), English, Social Sciences, Computer Science, and Foundation Olympiad sciences.
+- **Levels Covered:** JEE Main & Advanced, NEET-UG, NTSE, KVPY, Olympiads, Class 9–12 Board Exams.
 
-## Public pages
-- Home: https://eduhirebridge.in/
-- Teaching jobs (filter by subject, level, city, urgency): https://eduhirebridge.in/careers
-- Vacancy detail: https://eduhirebridge.in/careers/{id}
-- Verified faculty directory: https://eduhirebridge.in/faculty
-- Faculty profile: https://eduhirebridge.in/faculty/{id}
-- Partner institutes: https://eduhirebridge.in/institutes
-- Articles & career guides: https://eduhirebridge.in/content-hub (streams: /teacher-updates, /institute-updates, /blog; article: /blog/{slug})
-- About & FAQs: https://eduhirebridge.in/about
-- Contact: https://eduhirebridge.in/contact
+## Public Indexable Pages
+- Home: https://facultykart.in/
+- Teaching Vacancies & Jobs: https://facultykart.in/careers
+- Vacancy Detail: https://facultykart.in/careers/{id}
+- Verified Faculty Directory: https://facultykart.in/faculty
+- Faculty Profile: https://facultykart.in/faculty/{id}
+- Partner Institutes: https://facultykart.in/institutes
+- Content Hub & Career Guides: https://facultykart.in/content-hub
+- Teacher Updates Stream: https://facultykart.in/teacher-updates
+- Institute Recruiter Stream: https://facultykart.in/institute-updates
+- Educational Blog: https://facultykart.in/blog
+- About Us: https://facultykart.in/about
+- Contact & Regional Desks: https://facultykart.in/contact
 
-## Policies
-- Privacy: https://eduhirebridge.in/privacy
-- Terms: https://eduhirebridge.in/terms
-- Disclaimer: https://eduhirebridge.in/disclaimer
+## Legal & Compliance
+- Privacy Policy: https://facultykart.in/privacy
+- Terms of Service: https://facultykart.in/terms
+- Disclaimer: https://facultykart.in/disclaimer

@@ -211,7 +211,7 @@ function EmailPreview({ subject, message, ctaLabel }) {
   return (
     <div style={{ background: "var(--color-canvas-warm)", borderRadius: "var(--radius-card)", padding: "1rem" }}>
       <div style={{ background: "var(--color-brand-house)", color: "#fff", fontWeight: 800, padding: "0.75rem 1rem", borderRadius: "10px 10px 0 0" }}>
-        EduHire <span style={{ color: "var(--color-gold)" }}>Bridge</span>
+        Faculty <span style={{ color: "var(--color-gold)" }}>Kart</span>
       </div>
       <div style={{ background: "#fff", padding: "1.1rem 1rem", borderRadius: "0 0 10px 10px" }}>
         <div style={{ color: "var(--color-brand-green)", fontWeight: 700, fontSize: "1.1rem", marginBottom: "0.75rem" }}>{subject || "Your subject line"}</div>
@@ -357,7 +357,7 @@ function Composer() {
               <label className="form-label" htmlFor="eb-cta-url">
                 Button link (optional)
               </label>
-              <input id="eb-cta-url" type="url" className="input-field" placeholder="https://eduhirebridge.in/careers" value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} />
+              <input id="eb-cta-url" type="url" className="input-field" placeholder="https://facultykart.in/careers" value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} />
             </div>
           </div>
 

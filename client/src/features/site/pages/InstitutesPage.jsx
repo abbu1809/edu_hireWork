@@ -17,7 +17,7 @@ export default function InstitutesPage() {
 
   useSeo({
     title: "Partner Coaching Institutes & Schools",
-    description: "Coaching institutes and schools across India hiring verified IIT-JEE, NEET and K-12 faculty through EduHire Bridge.",
+    description: "Coaching institutes and schools across India hiring verified IIT-JEE, NEET and K-12 faculty through FacultyKart.",
     path: "/institutes",
     jsonLd: breadcrumbSchema(CRUMBS),
   });
@@ -30,10 +30,10 @@ export default function InstitutesPage() {
           <School size={13} aria-hidden="true" /> Partner Network
         </div>
         <h1 className="serif-headline" style={{ fontSize: "2.4rem", color: "var(--color-brand-house)", marginBottom: "0.75rem" }}>
-          Coaching Institutes & Schools Hiring on EduHire
+          Coaching Institutes & Schools Hiring on FacultyKart
         </h1>
         <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", maxWidth: "650px", margin: "0 auto" }}>
-          Institutions recruiting verified faculty through EduHire Bridge.
+          Institutions recruiting verified faculty through FacultyKart.
         </p>
       </div>
 

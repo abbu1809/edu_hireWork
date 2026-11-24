@@ -1,5 +1,8 @@
 import { Link } from "react-router";
+import { useDispatch } from "react-redux";
 import { AlertCircle, CheckCircle, ArrowRight, ShieldAlert, Sparkles } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { openFacultyCheckout } from "@/features/payments/store/paymentSlice";
 
 export default function ProfileCompletionCard({
   role = "teacher",
@@ -8,11 +11,14 @@ export default function ProfileCompletionCard({
   actionUrl = role === "teacher" ? "/teacher/profile" : "/institute/profile",
   style,
 }) {
+  const dispatch = useDispatch();
+  const { currentUser } = useAuth();
   const isEligible = percent >= 75;
   const isComplete = percent >= 100;
+  const isFeePaid = Boolean(currentUser?.is_platform_fee_paid);
   const actionText = role === "teacher" ? "apply for teaching jobs" : "publish job vacancies";
 
-  if (isComplete) return null;
+  if (isComplete && (role !== "teacher" || isFeePaid)) return null;
 
   return (
     <div
@@ -115,6 +121,47 @@ export default function ProfileCompletionCard({
               </span>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Teacher 75%+ One-Time ₹9 Activation Prompt */}
+      {role === "teacher" && isEligible && !isFeePaid && (
+        <div
+          style={{
+            marginTop: "0.85rem",
+            padding: "0.85rem 1rem",
+            background: "linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%, rgba(202, 138, 4, 0.06) 100%)",
+            borderRadius: "8px",
+            border: "1px solid rgba(202, 138, 4, 0.35)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "0.75rem",
+          }}
+        >
+          <div>
+            <div style={{ fontWeight: "700", color: "#854d0e", display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.92rem" }}>
+              <Sparkles size={16} color="#ca8a04" /> One-Time Profile Activation (₹9)
+            </div>
+            <div style={{ fontSize: "0.82rem", color: "#713f12", marginTop: "0.2rem" }}>
+              Congratulations on reaching {percent}%! Pay ₹9 once to activate your verified candidate status and apply for vacancies.
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => dispatch(openFacultyCheckout())}
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontWeight: "700" }}
+          >
+            Pay ₹9 & Activate
+          </button>
+        </div>
+      )}
+
+      {role === "teacher" && isEligible && isFeePaid && (
+        <div style={{ marginTop: "0.6rem", fontSize: "0.82rem", color: "#15803d", fontWeight: "600", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+          <CheckCircle size={15} color="#16a34a" /> One-Time Registration Fee Paid · Verified candidate eligible for all vacancies!
         </div>
       )}
     </div>
