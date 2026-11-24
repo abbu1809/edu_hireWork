@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { usePlatformSettings } from "@/features/site/hooks/useSite";
 import NewsletterSignup from "@/features/site/components/NewsletterSignup";
-import { GraduationCap, ShieldCheck, Star } from "lucide-react";
+import { ShieldCheck, Star } from "lucide-react";
 
 export default function Footer() {
   const { data: settings } = usePlatformSettings();
@@ -15,9 +15,7 @@ export default function Footer() {
           {/* Col 1: Brand & Identity */}
           <div className="footer-col">
             <Link to="/" style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
-              <div className="brand-symbol" style={{ width: "34px", height: "34px", fontSize: "1.1rem" }}>
-                <GraduationCap size={18} aria-hidden="true" />
-              </div>
+              <img src="/logo-badge.png" alt="FacultyKart" style={{ width: "36px", height: "36px", objectFit: "contain", flexShrink: 0 }} />
               <div style={{ fontSize: "1.25rem", fontWeight: "800", color: "var(--color-surface-white)" }}>
                 Faculty<span style={{ color: "var(--color-gold)" }}>Kart</span>
               </div>

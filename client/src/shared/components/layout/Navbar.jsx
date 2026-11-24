@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, NavLink, useLocation, useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
-import { LogOut, Menu, X, Bell, Briefcase, GraduationCap, Home, Users, BookOpen, Info, Mail, LayoutDashboard } from "lucide-react";
+import { LogOut, Menu, X, Bell, Briefcase, Home, Users, BookOpen, Info, Mail, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { logoutUser } from "@/features/auth/store/authSlice";
 import { useNotifications } from "@/features/notifications/hooks/useNotifications";
@@ -73,7 +73,7 @@ export default function Navbar() {
       <div className="nav-container">
         {/* Brand Wordmark & Logo */}
         <Link to="/" className="brand-logo-link" onClick={() => setMobileMenuOpen(false)}>
-          <div className="brand-symbol"><GraduationCap size={20} aria-hidden="true" /></div>
+          <img src="/logo.png" alt="FacultyKart" className="brand-logo-img" />
           <div className="brand-name">
             Faculty<span>Kart</span>
           </div>

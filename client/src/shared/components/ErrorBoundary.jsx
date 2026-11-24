@@ -1,5 +1,4 @@
 import React from "react";
-import { GraduationCap } from "lucide-react";
 
 /** Last-resort screen if a render error escapes a page. */
 export default class ErrorBoundary extends React.Component {
@@ -25,7 +24,7 @@ export default class ErrorBoundary extends React.Component {
         style={{ background: "var(--color-canvas-warm)" }}
       >
         <div className="card w-full max-w-[520px] text-center" style={{ padding: "2.5rem" }}>
-          <GraduationCap size={56} color="var(--color-brand-green)" aria-hidden="true" style={{ display: "block", margin: "0 auto 1rem" }} />
+          <img src="/logo.png" alt="FacultyKart" style={{ height: "54px", width: "auto", margin: "0 auto 1rem", display: "block" }} />
           <h2 style={{ color: "var(--color-brand-house)", fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.75rem" }}>
             FacultyKart
           </h2>

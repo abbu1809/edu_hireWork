@@ -491,6 +491,15 @@ h4 {
   flex-shrink: 0;
 }
 
+.brand-logo-img {
+  height: 34px;
+  width: auto;
+  max-width: 48px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
 .brand-symbol {
   width: 38px;
   height: 38px;
