@@ -18,7 +18,6 @@ const ContentHubPage = lazyWithPreload(() => import("@/features/content/pages/Co
 const BlogPostDetailPage = lazyWithPreload(() => import("@/features/content/pages/BlogPostDetailPage"));
 const StaticPolicyPages = lazyWithPreload(() => import("@/features/site/pages/StaticPolicyPages"));
 const UnsubscribePage = lazyWithPreload(() => import("@/features/site/pages/UnsubscribePage"));
-const NotificationsPage = lazyWithPreload(() => import("@/features/notifications/pages/NotificationsPage"));
 
 // Teacher portal
 const TeacherLayout = lazyWithPreload(() => import("@/features/teacher/pages/TeacherLayout"));
@@ -61,7 +60,6 @@ const STATIC_PAGES = ["about", "contact", "privacy", "terms", "disclaimer"];
   ["/blog", ContentHubPage],
   ["/teacher-updates", ContentHubPage],
   ["/institute-updates", ContentHubPage],
-  ["/notifications", NotificationsPage],
   ["/careers", VacancyDetailPage],
   ["/faculty", FacultyProfilePage],
   ["/teacher", TeacherLayout],
@@ -136,15 +134,6 @@ export default function AppRoutes() {
           ))}
 
           <Route path="unsubscribe" element={<UnsubscribePage />} />
-
-          <Route
-            path="notifications"
-            element={
-              <ProtectedRoute>
-                <NotificationsPage />
-              </ProtectedRoute>
-            }
-          />
 
           {/* Teacher portal */}
           <Route

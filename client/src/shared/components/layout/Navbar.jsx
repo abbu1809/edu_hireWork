@@ -201,13 +201,31 @@ export default function Navbar() {
                     <Briefcase size={16} /> My Dashboard
                   </Link>
 
-                  <Link
-                    to="/notifications"
+                  <button
+                    type="button"
                     role="menuitem"
-                    style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem", fontSize: "0.88rem", fontWeight: "600", borderRadius: "8px" }}
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      setNotifDrawerOpen(true);
+                    }}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      padding: "0.5rem 0.75rem",
+                      fontSize: "0.88rem",
+                      fontWeight: "600",
+                      borderRadius: "8px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      color: "inherit",
+                    }}
                   >
                     <Bell size={16} /> Notifications {unreadCount > 0 && `(${unreadCount})`}
-                  </Link>
+                  </button>
 
                   <button
                     role="menuitem"

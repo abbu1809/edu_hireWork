@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { Bell, CheckCheck, X, ExternalLink } from "lucide-react";
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications } from "../hooks/useNotifications";
 import EmptyState from "@/shared/components/EmptyState";
@@ -184,24 +184,6 @@ export default function NotificationDrawer({ open, onClose }) {
               </ul>
             )}
           </QueryState>
-        </div>
-
-        {/* Footer */}
-        <div
-          style={{
-            padding: "0.75rem 1.25rem",
-            borderTop: "1px solid var(--color-canvas-ceramic)",
-            textAlign: "center",
-            background: "var(--color-surface-white)",
-          }}
-        >
-          <Link
-            to="/notifications"
-            onClick={onClose}
-            style={{ fontSize: "0.83rem", fontWeight: 600, color: "var(--color-brand-accent)" }}
-          >
-            View full notifications page →
-          </Link>
         </div>
       </aside>
     </div>,
