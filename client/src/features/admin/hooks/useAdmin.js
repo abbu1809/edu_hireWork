@@ -60,6 +60,13 @@ export const useEmailBroadcasts = () =>
     refetchInterval: (query) => ((query.state.data || []).some((b) => b.status === "QUEUED" || b.status === "SENDING") ? 4000 : false),
   });
 
+export const useEmailLogs = () =>
+  useQuery({
+    queryKey: ["admin", "email", "logs"],
+    queryFn: adminApi.emailLogs,
+    staleTime: 30 * 1000,
+  });
+
 export const useSubscribers = () =>
   useQuery({
     queryKey: ["admin", "subscribers"],

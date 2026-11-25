@@ -72,7 +72,7 @@ const dedupe = (list) => {
 };
 
 /** Sends every recipient in the background and records progress on the broadcast row. */
-const run = async (broadcast, recipients, content) => {
+const run = async (broadcast, recipients, content, fromEmail = null) => {
   await EmailBroadcastModel.update(serviceDb, broadcast.id, { status: "SENDING" });
   let sent = 0;
   let failed = 0;
@@ -85,6 +85,7 @@ const run = async (broadcast, recipients, content) => {
         { ...content, name: r.name, unsubscribeUrl: r.unsubscribeUrl, preferencesUrl: r.preferencesUrl },
         {
           broadcastId: broadcast.id,
+          fromEmail,
           headers: r.unsubscribeUrl ? { "List-Unsubscribe": `<${r.unsubscribeUrl}>`, Precedence: "bulk" } : { Precedence: "bulk" },
         }
       ).then((result) => {
@@ -104,7 +105,7 @@ const run = async (broadcast, recipients, content) => {
 
 export const BroadcastService = {
   /** Validates, resolves recipients, records the campaign and starts sending. Returns immediately. */
-  async start({ adminId, audience, userIds, subject, message, ctaLabel, ctaUrl }) {
+  async start({ adminId, audience, userIds, subject, message, ctaLabel, ctaUrl, fromEmail }) {
     const aud = String(audience || "").toUpperCase();
     if (!EMAIL_AUDIENCES.includes(aud)) throw ApiError.badRequest("Invalid audience.");
     const cleanSubject = String(subject || "").trim();
@@ -134,7 +135,7 @@ export const BroadcastService = {
       recipients_count: recipients.length,
     });
 
-    run(broadcast, recipients, content).catch(async (error) => {
+    run(broadcast, recipients, content, fromEmail || null).catch(async (error) => {
       console.error("[email] broadcast failed:", error);
       await EmailBroadcastModel.update(serviceDb, broadcast.id, { status: "FAILED" }).catch(() => {});
     });

@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Mail, Send, Users, Building, CheckCircle2, AlertTriangle, Terminal, Search, Inbox, Eye } from "lucide-react";
 import {
   useAdminInstitutes,
   useAdminTeachers,
   useEmailBroadcast,
   useEmailBroadcasts,
+  useEmailLogs,
   useEmailStatus,
   useEmailTest,
   useSubscribers,
@@ -34,6 +35,9 @@ function DeliveryStatus() {
   const statusQuery = useEmailStatus();
   const test = useEmailTest();
   const [to, setTo] = useState(currentUser?.email || "");
+  useEffect(() => {
+    if (!to && currentUser?.email) setTo(currentUser.email);
+  }, [currentUser?.email, to]);
   const s = statusQuery.data;
 
   const mode = !s
@@ -61,9 +65,17 @@ function DeliveryStatus() {
           <>
             <dl className="info-panel" style={{ marginBottom: "1.25rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem" }}>
-                <dt>Sender</dt>
+                <dt>Default Sender</dt>
                 <dd style={{ margin: 0, fontWeight: 600, wordBreak: "break-all" }}>{s.from}</dd>
               </div>
+              {s.aliases && (
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+                  <dt>Active Aliases</dt>
+                  <dd style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-secondary)", textAlign: "right" }}>
+                    {[s.aliases.noReply, s.aliases.info, s.aliases.contact, s.aliases.support].filter(Boolean).join(" · ")}
+                  </dd>
+                </div>
+              )}
               <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem" }}>
                 <dt>Sign-up email OTP</dt>
                 <dd style={{ margin: 0, fontWeight: 600 }}>{s.signupOtpRequired ? "Required" : "Off"}</dd>
@@ -236,6 +248,7 @@ function EmailPreview({ subject, message, ctaLabel }) {
 function Composer() {
   const broadcast = useEmailBroadcast();
   const [audience, setAudience] = useState("TEACHER");
+  const [fromEmail, setFromEmail] = useState("info@facultykart.in");
   const [selected, setSelected] = useState(() => new Set());
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -258,6 +271,7 @@ function Composer() {
     broadcast.mutate(
       {
         audience,
+        fromEmail,
         userIds: audience === "SELECTED" ? [...selected] : undefined,
         subject: subject.trim(),
         message: message.trim(),
@@ -322,6 +336,18 @@ function Composer() {
           </fieldset>
 
           {audience === "SELECTED" && <RecipientPicker selected={selected} onChange={setSelected} />}
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="eb-from">
+              Send From Alias
+            </label>
+            <select id="eb-from" className="input-select" style={{ width: "100%" }} value={fromEmail} onChange={(e) => setFromEmail(e.target.value)}>
+              <option value="info@facultykart.in">info@facultykart.in (Announcements, Newsletters &amp; Job Alerts)</option>
+              <option value="contact@facultykart.in">contact@facultykart.in (General &amp; Institute Inquiries)</option>
+              <option value="support@facultykart.in">support@facultykart.in (Candidate &amp; KYC Support)</option>
+              <option value="no-reply@facultykart.in">no-reply@facultykart.in (Automated System Notices)</option>
+            </select>
+          </div>
 
           <div className="form-group">
             <label className="form-label" htmlFor="eb-subject">
@@ -496,6 +522,58 @@ function Subscribers() {
   );
 }
 
+function DeliveryLogs() {
+  const query = useEmailLogs();
+  const logs = query.data || [];
+  return (
+    <div className="card">
+      <div className="card-header">
+        <h3 className="card-title">Recent Delivery Logs</h3>
+      </div>
+      <QueryState query={query} loadingLabel="Loading delivery logs...">
+        {logs.length === 0 ? (
+          <EmptyState bare icon={Mail} iconSize={24} title="No Email Logs Yet">
+            Every transactional and broadcast email attempt is logged here.
+          </EmptyState>
+        ) : (
+          <div className="table-responsive" style={{ boxShadow: "none", maxHeight: "420px" }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Recipient</th>
+                  <th>Template</th>
+                  <th>Subject</th>
+                  <th>Status</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((l) => (
+                  <tr key={l.id}>
+                    <td style={{ whiteSpace: "nowrap" }}>{formatDateTime(l.created_at)}</td>
+                    <td style={{ wordBreak: "break-all" }}>{l.to_email}</td>
+                    <td><span className="badge badge-role">{l.template}</span></td>
+                    <td>{l.subject}</td>
+                    <td>
+                      <span className={`badge ${l.status === "SENT" ? "badge-verified" : l.status === "FAILED" ? "badge-rejected" : "badge-pending"}`}>
+                        {l.status}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: "0.8rem", color: l.error ? "var(--color-error)" : "var(--text-secondary)" }}>
+                      {l.error || "Delivered"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </QueryState>
+    </div>
+  );
+}
+
 export default function AdminEmailPage() {
   useDocumentTitle("Email Center");
   const { data: campaigns = [] } = useEmailBroadcasts();
@@ -519,6 +597,7 @@ export default function AdminEmailPage() {
           <Subscribers />
         </div>
         <CampaignHistory />
+        <DeliveryLogs />
       </div>
     </div>
   );

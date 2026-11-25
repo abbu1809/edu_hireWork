@@ -6,6 +6,7 @@ import { LogOut, Menu, X, Bell, Briefcase, Home, Users, BookOpen, Info, Mail, La
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { logoutUser } from "@/features/auth/store/authSlice";
 import { useNotifications } from "@/features/notifications/hooks/useNotifications";
+import NotificationDrawer from "@/features/notifications/components/NotificationDrawer";
 import { queryClient } from "@/app/queryClient";
 import { notify } from "@/shared/utils/notify";
 import { homePathForRole, initialOf } from "@/shared/utils/format";
@@ -26,6 +27,7 @@ export default function Navbar() {
   const { data: notifications } = useNotifications();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [notifDrawerOpen, setNotifDrawerOpen] = useState(false);
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -97,13 +99,18 @@ export default function Navbar() {
         <div className="nav-actions">
           {currentUser ? (
             <div ref={dropdownRef} style={{ display: "flex", alignItems: "center", gap: "0.75rem", position: "relative" }}>
-              {/* Notification Bell */}
-              <Link
-                to="/notifications"
+              {/* Notification Bell (opens side-mounted drawer) */}
+              <button
+                type="button"
                 className="btn-icon"
                 style={{ background: "var(--color-canvas-warm)", border: "none", cursor: "pointer", position: "relative" }}
+                onClick={() => {
+                  setUserDropdownOpen(false);
+                  setNotifDrawerOpen(true);
+                }}
                 title="Notifications"
                 aria-label={`Notifications${unreadCount ? ` (${unreadCount} unread)` : ""}`}
+                aria-expanded={notifDrawerOpen}
               >
                 <Bell size={18} color="var(--color-brand-house)" />
                 {unreadCount > 0 && (
@@ -127,7 +134,7 @@ export default function Navbar() {
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
-              </Link>
+              </button>
 
               {/* User Avatar & Menu Pill */}
               <button
@@ -285,6 +292,8 @@ export default function Navbar() {
         </nav>,
           document.body
         )}
+
+      {currentUser && <NotificationDrawer open={notifDrawerOpen} onClose={() => setNotifDrawerOpen(false)} />}
     </header>
   );
 }

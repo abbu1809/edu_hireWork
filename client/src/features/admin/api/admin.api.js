@@ -32,6 +32,7 @@ export const adminApi = {
   emailTest: (to) => http.post("/admin/email/test", { to }).then((res) => res.data),
   emailBroadcast: (payload) => http.post("/admin/email/broadcast", payload).then((res) => res.data),
   emailBroadcasts: () => unwrap(http.get("/admin/email/broadcasts")),
+  emailLogs: () => unwrap(http.get("/admin/email/logs")),
   subscribers: () => unwrapWithMeta(http.get("/admin/subscribers")),
 
   inquiries: () => unwrap(http.get("/admin/inquiries")),

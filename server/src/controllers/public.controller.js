@@ -75,14 +75,26 @@ export const PublicController = {
       message: String(message).trim().slice(0, 5000),
     });
     EmailService.background(EmailService.send(inquiry.email, "inquiryAck", { name: inquiry.name }));
-    if (config.email.adminNotifyEmail) {
+    const notifyTargets = [
+      ...new Set(
+        [config.email.adminNotifyEmail, config.email.aliases?.contact, config.adminEmail]
+          .map((addr) => String(addr || "").trim().toLowerCase())
+          .filter(Boolean)
+      ),
+    ];
+    for (const target of notifyTargets) {
       EmailService.background(
-        EmailService.send(config.email.adminNotifyEmail, "inquiryAdmin", {
-          name: inquiry.name,
-          email: inquiry.email,
-          role: inquiry.role,
-          message: inquiry.message,
-        })
+        EmailService.send(
+          target,
+          "inquiryAdmin",
+          {
+            name: inquiry.name,
+            email: inquiry.email,
+            role: inquiry.role,
+            message: inquiry.message,
+          },
+          { replyTo: inquiry.email }
+        )
       );
     }
     res.status(201).json({ success: true, data: { id: inquiry.id } });

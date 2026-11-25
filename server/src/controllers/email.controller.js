@@ -60,6 +60,7 @@ export const EmailController = {
         connected: check.ok,
         error: check.error || null,
         from: config.email.fromEmail,
+        aliases: config.email.aliases,
         signupOtpRequired: isSignupOtpRequired(),
         queued: EmailService.queueSize(),
       },
@@ -79,8 +80,8 @@ export const EmailController = {
   }),
 
   broadcast: asyncHandler(async (req, res) => {
-    const { audience, userIds, subject, message, ctaLabel, ctaUrl } = req.body;
-    const broadcast = await BroadcastService.start({ adminId: req.user.id, audience, userIds, subject, message, ctaLabel, ctaUrl });
+    const { audience, userIds, subject, message, ctaLabel, ctaUrl, fromEmail } = req.body;
+    const broadcast = await BroadcastService.start({ adminId: req.user.id, audience, userIds, subject, message, ctaLabel, ctaUrl, fromEmail });
     await AdminActionModel.log(req.db, {
       adminId: req.user.id,
       actionType: "EMAIL_BROADCAST",

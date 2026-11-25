@@ -66,11 +66,17 @@ export const config = {
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : Number(process.env.SMTP_PORT) === 465,
     user: (process.env.SMTP_USER || "").trim(),
     pass: (process.env.SMTP_PASS || "").trim(),
-    fromEmail: (process.env.FROM_EMAIL || process.env.SMTP_USER || "no-reply@facultykart.in").trim(),
+    fromEmail: (process.env.FROM_EMAIL || "no-reply@facultykart.in").trim(),
     fromName: (process.env.FROM_NAME || "FacultyKart").trim(),
-    replyTo: (process.env.REPLY_TO_EMAIL || "contact@facultykart.in").trim(),
+    replyTo: (process.env.REPLY_TO_EMAIL || "support@facultykart.in").trim(),
     // Address that receives copies of contact-form inquiries.
     adminNotifyEmail: (process.env.ADMIN_NOTIFY_EMAIL || process.env.ADMIN_EMAIL || "facultykart@gmail.com").trim().toLowerCase(),
+    aliases: {
+      noReply: (process.env.EMAIL_NO_REPLY || process.env.FROM_EMAIL || "no-reply@facultykart.in").trim(),
+      info: (process.env.EMAIL_INFO || "info@facultykart.in").trim(),
+      contact: (process.env.EMAIL_CONTACT || "contact@facultykart.in").trim(),
+      support: (process.env.EMAIL_SUPPORT || process.env.REPLY_TO_EMAIL || "support@facultykart.in").trim(),
+    },
     otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES) || 10,
     // Require an email OTP before sign-up. Set to "false" to fall back to Supabase confirmation emails.
     requireSignupOtp: process.env.REQUIRE_SIGNUP_OTP !== "false",

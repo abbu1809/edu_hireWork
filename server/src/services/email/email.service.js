@@ -42,8 +42,48 @@ const TRANSIENT_CODES = ["ETIMEDOUT", "ECONNECTION", "ECONNRESET", "ESOCKET", "E
 const TRANSIENT_SMTP = [421, 450, 451, 452, 454];
 const isTransient = (error) => TRANSIENT_CODES.includes(error?.code) || TRANSIENT_SMTP.includes(error?.responseCode);
 
+const formatFrom = (email, label = config.email.fromName) =>
+  `"${String(label || "FacultyKart").replace(/"/g, "")}" <${email}>`;
+
+const senderForTemplate = (template) => {
+  const aliases = config.email.aliases || {};
+  switch (template) {
+    case "otp":
+    case "welcome":
+    case "loginAlert":
+    case "passwordChanged":
+    case "paymentReceipt":
+      return {
+        from: formatFrom(aliases.noReply || config.email.fromEmail, "FacultyKart"),
+        replyTo: aliases.support || config.email.replyTo,
+      };
+    case "inquiryAck":
+    case "inquiryAdmin":
+      return {
+        from: formatFrom(aliases.contact || config.email.fromEmail, "FacultyKart Contact"),
+        replyTo: aliases.contact || config.email.replyTo,
+      };
+    case "verificationDecision":
+      return {
+        from: formatFrom(aliases.support || config.email.fromEmail, "FacultyKart Support"),
+        replyTo: aliases.support || config.email.replyTo,
+      };
+    case "subscribeConfirm":
+    case "broadcast":
+    case "jobAlert":
+    case "matchRecommendation":
+    case "applicationStatus":
+    case "interviewScheduled":
+    default:
+      return {
+        from: formatFrom(aliases.info || config.email.fromEmail, "FacultyKart"),
+        replyTo: aliases.contact || config.email.replyTo,
+      };
+  }
+};
+
 /** Renders and delivers one email right now (with retries). Used by the queue. */
-const deliver = async ({ to, template, data = {}, broadcastId = null, headers = {} }) => {
+const deliver = async ({ to, template, data = {}, broadcastId = null, headers = {}, fromEmail = null, replyTo = null }) => {
   const render = templates[template];
   if (!render) throw new Error(`Unknown email template: ${template}`);
   const { subject, html, text } = render(data);
@@ -53,14 +93,18 @@ const deliver = async ({ to, template, data = {}, broadcastId = null, headers = 
     return { ok: false, skipped: true };
   }
 
+  const route = senderForTemplate(template);
+  const resolvedFrom = fromEmail ? formatFrom(fromEmail) : route.from || fromAddress;
+  const resolvedReplyTo = replyTo || route.replyTo || config.email.replyTo;
+
   const message = {
-    from: fromAddress,
+    from: resolvedFrom,
     to,
     subject,
     html,
     text,
     headers,
-    ...(config.email.replyTo ? { replyTo: config.email.replyTo } : {}),
+    ...(resolvedReplyTo ? { replyTo: resolvedReplyTo } : {}),
   };
 
   let lastError;
