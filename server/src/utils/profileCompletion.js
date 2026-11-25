@@ -23,9 +23,8 @@ export const calculateProfileCompletion = (teacher) => {
   else missing.push("Write professional bio");
 
   // 3. Subject / expertise (15%)
-  if (teacher.primary_subject || (teacher.subjects && teacher.subjects.length > 0)) score += 10;
-  else missing.push("Select primary & secondary subjects");
-  if (teacher.specialization || (teacher.subjects && teacher.subjects.length > 1)) score += 5;
+  if (teacher.primary_subject || (teacher.subjects && teacher.subjects.length > 0)) score += 15;
+  else missing.push("Select primary subject");
 
   // 4. Experience (15%)
   if (teacher.experience_years !== undefined && teacher.experience_years !== null) score += 5;

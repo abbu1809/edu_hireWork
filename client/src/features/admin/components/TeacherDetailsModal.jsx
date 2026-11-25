@@ -84,12 +84,18 @@ export default function TeacherDetailsModal({ teacherId, onClose }) {
               <div style={{ fontWeight: "600", marginTop: "0.2rem" }}>{teacher.experience_years != null ? `${teacher.experience_years} Years` : "—"}</div>
             </div>
             <div style={{ background: "var(--surface-sunken, #f8fafc)", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Current Salary</div>
-              <div style={{ fontWeight: "600", marginTop: "0.2rem" }}>{teacher.current_salary ? formatCurrency(teacher.current_salary) : "—"}</div>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Current Organization</div>
+              <div style={{ fontWeight: "600", marginTop: "0.2rem" }}>{teacher.current_organization || "Not specified"}</div>
             </div>
             <div style={{ background: "var(--surface-sunken, #f8fafc)", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Expected Salary</div>
-              <div style={{ fontWeight: "600", marginTop: "0.2rem" }}>{teacher.expected_salary ? formatCurrency(teacher.expected_salary) : "—"}</div>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Designation</div>
+              <div style={{ fontWeight: "600", marginTop: "0.2rem" }}>{teacher.current_designation || "—"}</div>
+            </div>
+            <div style={{ background: "var(--surface-sunken, #f8fafc)", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Expected Salary / CTC</div>
+              <div style={{ fontWeight: "600", marginTop: "0.2rem" }}>
+                {teacher.expected_ctc || (teacher.expected_salary ? formatCurrency(teacher.expected_salary) : "—")}
+              </div>
             </div>
           </div>
 
@@ -114,7 +120,7 @@ export default function TeacherDetailsModal({ teacherId, onClose }) {
 
           {/* Qualifications & Demo Link */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-            {teacher.qualifications && (
+            {(teacher.qualification || teacher.qualifications) && (
               <div style={{ background: "var(--surface-sunken, #f8fafc)", padding: "0.75rem", borderRadius: "8px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: "600", fontSize: "0.85rem", marginBottom: "0.3rem" }}>
                   <GraduationCap size={16} /> Qualifications
@@ -122,7 +128,7 @@ export default function TeacherDetailsModal({ teacherId, onClose }) {
                 <div style={{ fontSize: "0.85rem" }}>
                   {Array.isArray(teacher.qualifications)
                     ? teacher.qualifications.join(", ")
-                    : String(teacher.qualifications)}
+                    : String(teacher.qualification || teacher.qualifications)}
                 </div>
               </div>
             )}
