@@ -168,6 +168,8 @@ export const AdminController = {
 
     if (status === "Verified" || status === "Rejected") {
       const approved = status === "Verified";
+      // Sync any pending uploaded documents (resume, KYC, certificates) with the verification decision.
+      await DocumentModel.updatePendingStatusForUser(serviceDb, req.params.id, approved ? "Approved" : "Rejected");
       await NotificationService.notify({
         userId: req.params.id,
         title: approved ? "🎉 KYC Verification Approved!" : "⚠️ KYC Verification Update",
@@ -181,6 +183,16 @@ export const AdminController = {
       );
     }
     res.json({ success: true, data });
+  }),
+
+  verifyDocument: asyncHandler(async (req, res) => {
+    const { status } = req.body;
+    if (!["Approved", "Rejected", "Pending"].includes(status)) {
+      throw ApiError.badRequest("Invalid document status.");
+    }
+    const doc = await DocumentModel.update(serviceDb, req.params.id, { status });
+    if (!doc) throw ApiError.notFound("Document not found.");
+    res.json({ success: true, data: doc });
   }),
 
   featureEntity: asyncHandler(async (req, res) => {

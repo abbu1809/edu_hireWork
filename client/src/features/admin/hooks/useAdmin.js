@@ -29,6 +29,7 @@ export const useVerifyEntity = () => useAdminMutation(adminApi.verify, [["teache
 export const useFeatureEntity = () => useAdminMutation(adminApi.feature, [["teachers"], ["institutes"], ["public"]]);
 export const useArchiveEntity = () => useAdminMutation(adminApi.archive, [["teachers"], ["institutes"], ["public"]]);
 export const useDeleteEntity = () => useAdminMutation(adminApi.deleteEntity, [["teachers"], ["institutes"], ["public"]]);
+export const useVerifyDocument = () => useAdminMutation(adminApi.verifyDocument);
 export const useTeacherDetails = (id) =>
   useQuery({
     queryKey: ["admin", "teachers", id],

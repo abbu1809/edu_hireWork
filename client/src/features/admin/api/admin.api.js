@@ -10,6 +10,7 @@ export const adminApi = {
   getInstitute: (id) => unwrap(http.get(`/admin/institutes/${id}`)),
   deleteEntity: ({ entity, id, permanent = true }) =>
     unwrap(http.delete(`/admin/${entity}/${id}`, { params: { permanent } })),
+  verifyDocument: ({ id, status }) => unwrap(http.patch(`/admin/documents/${id}`, { status })),
   verify: ({ entity, id, status, reason, notes }) => unwrap(http.post(`/admin/${entity}/${id}/verify`, { status, reason, notes })),
   feature: ({ entity, id, feature }) => unwrap(http.post(`/admin/${entity}/${id}/feature`, { feature })),
   archive: ({ entity, id, archive }) => unwrap(http.post(`/admin/${entity}/${id}/archive`, { archive })),

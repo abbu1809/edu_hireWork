@@ -13,4 +13,12 @@ export const DocumentModel = {
       unwrap(await db.from("documents").select("*").eq("user_id", userId).order("created_at", { ascending: false })) || []
     );
   },
+
+  async updatePendingStatusForUser(db, userId, status) {
+    return (
+      unwrap(
+        await db.from("documents").update({ status }).eq("user_id", userId).eq("status", "Pending").select()
+      ) || []
+    );
+  },
 };

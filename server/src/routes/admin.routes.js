@@ -23,6 +23,7 @@ router.post("/:entity(teachers|institutes)/:id/feature", AdminController.feature
 router.post("/:entity(teachers|institutes)/:id/archive", AdminController.archiveEntity);
 router.post("/:entity(teachers|institutes)/:id/flag", AdminController.flagEntity);
 router.delete("/:entity(teachers|institutes)/:id", AdminController.deleteEntity);
+router.patch("/documents/:id", AdminController.verifyDocument);
 router.get("/audit-logs", AdminController.auditLogs);
 
 // Vacancies, applications, matchmaking, broadcast

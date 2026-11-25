@@ -1,13 +1,31 @@
 import { ExternalLink, FileText, CheckCircle, XCircle, Trash2, Star, Archive, ShieldCheck, Video, MapPin, Mail, Phone, Briefcase, GraduationCap } from "lucide-react";
 import Modal from "@/shared/components/Modal";
 import VerificationBadge from "./VerificationBadge";
-import { useTeacherDetails } from "../hooks/useAdmin";
+import { useTeacherDetails, useVerifyDocument } from "../hooks/useAdmin";
 import { useEntityActions } from "../hooks/useEntityActions";
 import { formatCurrency, isVerifiedProfile } from "@/shared/utils/format";
+import { notify } from "@/shared/utils/notify";
+
+const DOC_STATUS_BADGE = {
+  Approved: "badge-verified",
+  Rejected: "badge-rejected",
+  Pending: "badge-pending",
+};
 
 export default function TeacherDetailsModal({ teacherId, onClose }) {
   const { data: teacher, isLoading, error } = useTeacherDetails(teacherId);
   const actions = useEntityActions("teachers");
+  const verifyDoc = useVerifyDocument();
+
+  const handleDocDecision = (docId, status) => {
+    verifyDoc.mutate(
+      { id: docId, status },
+      {
+        onSuccess: () => notify.success(`Document marked as ${status}.`),
+        onError: (err) => notify.apiError(err, "Could not update document status."),
+      }
+    );
+  };
 
   if (!teacherId) return null;
 
@@ -162,30 +180,57 @@ export default function TeacherDetailsModal({ teacherId, onClose }) {
               {/* Other Documents */}
               {teacher.documents && teacher.documents.length > 0 ? (
                 teacher.documents.map((doc) => (
-                  <div key={doc.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 1rem", background: "var(--surface-sunken, #f8fafc)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                  <div key={doc.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", padding: "0.75rem 1rem", background: "var(--surface-sunken, #f8fafc)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                       <FileText size={20} color="var(--primary-color)" />
                       <div>
-                        <div style={{ fontWeight: "600", fontSize: "0.9rem" }}>{doc.file_name || doc.document_type}</div>
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.15rem" }}>
+                        <div style={{ fontWeight: "600", fontSize: "0.9rem" }}>{doc.name || doc.file_name || doc.document_type}</div>
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.15rem", flexWrap: "wrap" }}>
                           <span className="badge badge-role" style={{ fontSize: "0.7rem" }}>{doc.document_type}</span>
+                          <span className={`badge ${DOC_STATUS_BADGE[doc.status] || "badge-pending"}`} style={{ fontSize: "0.7rem" }}>
+                            {doc.status || "Pending"}
+                          </span>
                           <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>{doc.created_at ? new Date(doc.created_at).toLocaleDateString() : ""}</span>
                         </div>
                       </div>
                     </div>
-                    {doc.signed_url ? (
-                      <a
-                        href={doc.signed_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-outline btn-sm"
-                        style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem" }}
-                      >
-                        <ExternalLink size={14} /> View Document
-                      </a>
-                    ) : (
-                      <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>URL unavailable</span>
-                    )}
+                    <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", flexWrap: "wrap" }}>
+                      {doc.status !== "Approved" && (
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          disabled={verifyDoc.isPending}
+                          onClick={() => handleDocDecision(doc.id, "Approved")}
+                          style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+                        >
+                          <CheckCircle size={13} /> Approve
+                        </button>
+                      )}
+                      {doc.status !== "Rejected" && (
+                        <button
+                          type="button"
+                          className="btn btn-danger-outline btn-sm"
+                          disabled={verifyDoc.isPending}
+                          onClick={() => handleDocDecision(doc.id, "Rejected")}
+                          style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+                        >
+                          <XCircle size={13} /> Reject
+                        </button>
+                      )}
+                      {doc.signed_url ? (
+                        <a
+                          href={doc.signed_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-outline btn-sm"
+                          style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem" }}
+                        >
+                          <ExternalLink size={14} /> View
+                        </a>
+                      ) : (
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>URL unavailable</span>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : !teacher.resume_signed_url ? (
