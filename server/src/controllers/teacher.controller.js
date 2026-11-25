@@ -6,6 +6,7 @@ import { calculateProfileCompletion } from "../utils/profileCompletion.js";
 import { TeacherModel } from "../models/teacher.model.js";
 import { ProfileModel } from "../models/profile.model.js";
 import { AuthService } from "../services/auth.service.js";
+import { cache } from "../utils/cache.js";
 
 /** Fields a teacher may change on their own record. Verification, badges and ratings are admin-only. */
 const TEACHER_EDITABLE = [
@@ -72,11 +73,17 @@ const PROFILE_FIELDS = ["name", "phone", "city", "state"];
 export const TeacherController = {
   /** Public faculty directory (safe fields only). */
   listPublic: asyncHandler(async (req, res) => {
-    res.json({ success: true, data: await TeacherModel.listPublic(anonDb, req.query) });
+    const data = await cache.remember(`public:teachers:${req.originalUrl}`, 20_000, () =>
+      TeacherModel.listPublic(anonDb, req.query)
+    );
+    res.set("Cache-Control", "public, max-age=15, stale-while-revalidate=30");
+    res.json({ success: true, data });
   }),
 
   getPublic: asyncHandler(async (req, res) => {
-    const teacher = await TeacherModel.findPublicById(anonDb, req.params.id);
+    const teacher = await cache.remember(`public:teacher:${req.params.id}`, 20_000, () =>
+      TeacherModel.findPublicById(anonDb, req.params.id)
+    );
     if (!teacher) throw ApiError.notFound("This faculty profile is not available.");
     res.json({ success: true, data: teacher });
   }),
@@ -107,6 +114,7 @@ export const TeacherController = {
     updates.profile_completion_percentage = percent;
 
     await TeacherModel.update(req.db, req.user.id, updates);
+    cache.invalidatePrefix("public:teacher");
     const user = await AuthService.buildCurrentUser(req.auth.user);
     res.json({ success: true, data: user });
   }),

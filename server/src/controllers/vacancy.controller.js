@@ -6,6 +6,7 @@ import { VacancyModel } from "../models/vacancy.model.js";
 import { InstituteModel } from "../models/institute.model.js";
 import { JobAlertService } from "../services/email/jobAlert.service.js";
 import { calculateInstituteProfileCompletion } from "../utils/profileCompletion.js";
+import { cache } from "../utils/cache.js";
 
 const EDITABLE_FIELDS = [
   "title",
@@ -40,12 +41,18 @@ const cleanPayload = (body) => {
 export const VacancyController = {
   /** Public job board. */
   listActive: asyncHandler(async (req, res) => {
-    res.json({ success: true, data: await VacancyModel.listActive(anonDb, req.query) });
+    const data = await cache.remember(`public:vacancies:${req.originalUrl}`, 20_000, () =>
+      VacancyModel.listActive(anonDb, req.query)
+    );
+    res.set("Cache-Control", "public, max-age=15, stale-while-revalidate=30");
+    res.json({ success: true, data });
   }),
 
   getById: asyncHandler(async (req, res) => {
     const db = req.db || anonDb;
-    const vacancy = await VacancyModel.findById(db, req.params.id);
+    const vacancy = req.db
+      ? await VacancyModel.findById(db, req.params.id)
+      : await cache.remember(`public:vacancy:${req.params.id}`, 20_000, () => VacancyModel.findById(anonDb, req.params.id));
     if (!vacancy) throw ApiError.notFound("This vacancy is no longer available.");
     res.json({ success: true, data: vacancy });
   }),
@@ -74,6 +81,8 @@ export const VacancyController = {
       institute_id: req.user.id,
       institute_name: institute?.institute_name || req.user.name,
     });
+    cache.invalidatePrefix("public:vacanc");
+    cache.del("public:stats");
     JobAlertService.notifyMatchingTeachers(vacancy).catch((err) => console.warn("[email] job alerts failed:", err.message));
     res.status(201).json({ success: true, data: vacancy });
   }),
@@ -81,11 +90,15 @@ export const VacancyController = {
   update: asyncHandler(async (req, res) => {
     const vacancy = await VacancyModel.update(req.db, req.params.id, cleanPayload(req.body));
     if (!vacancy) throw ApiError.notFound("Vacancy not found.");
+    cache.invalidatePrefix("public:vacanc");
+    cache.del("public:stats");
     res.json({ success: true, data: vacancy });
   }),
 
   remove: asyncHandler(async (req, res) => {
     await VacancyModel.remove(req.db, req.params.id);
+    cache.invalidatePrefix("public:vacanc");
+    cache.del("public:stats");
     res.json({ success: true, message: "Vacancy removed." });
   }),
 };

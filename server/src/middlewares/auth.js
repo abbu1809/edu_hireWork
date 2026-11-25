@@ -1,10 +1,71 @@
 import { serviceDb, createUserClient } from "../config/supabase.js";
 import { ApiError } from "../utils/ApiError.js";
 import { SessionService } from "../services/session.service.js";
+import { sha256, decodeJwtPayload } from "../utils/crypto.js";
+import { cache } from "../utils/cache.js";
+
+const AUTH_CACHE_MS = 30 * 1000;
 
 const readBearerToken = (req) => {
   const header = req.headers.authorization || "";
   return header.startsWith("Bearer ") ? header.slice(7).trim() : null;
+};
+
+/** Clears cached auth identity for a specific token (e.g. on logout). */
+export const invalidateAuthToken = (token) => {
+  if (token) cache.del(`auth:tok:${sha256(token)}`);
+};
+
+/**
+ * Resolves and caches { authUser, profile } for a valid, non-revoked bearer token.
+ * Runs JWT verification, active-session check, and profile lookup in parallel on cache miss.
+ */
+export const resolveTokenIdentity = async (token) => {
+  const payload = decodeJwtPayload(token);
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (payload?.exp && payload.exp <= nowSec) {
+    throw ApiError.unauthorized("Your session has expired. Please sign in again.", { code: "ACCESS_TOKEN_EXPIRED" });
+  }
+
+  const tokenKey = `auth:tok:${sha256(token)}`;
+  const cached = cache.get(tokenKey);
+
+  // Always check SessionService (which has its own 30s cache and is revoked immediately on logout).
+  if (cached) {
+    const session = await SessionService.resolveActive(token);
+    if (!session || session.userId !== cached.authUser.id) {
+      cache.del(tokenKey);
+      throw ApiError.unauthorized("This session was signed out. Please sign in again.", { code: "SESSION_REVOKED" });
+    }
+    return { ...cached, session };
+  }
+
+  const sub = payload?.sub;
+  const [{ data, error }, session, profileRes] = await Promise.all([
+    serviceDb.auth.getUser(token),
+    SessionService.resolveActive(token),
+    sub
+      ? serviceDb.from("profiles").select("id, name, email, role").eq("id", sub).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  if (error || !data?.user) {
+    throw ApiError.unauthorized("Your session has expired. Please sign in again.", { code: "ACCESS_TOKEN_EXPIRED" });
+  }
+  if (!session || session.userId !== data.user.id) {
+    throw ApiError.unauthorized("This session was signed out. Please sign in again.", { code: "SESSION_REVOKED" });
+  }
+
+  let profile = profileRes?.data || null;
+  if (!profile && data.user.id !== sub) {
+    const res = await serviceDb.from("profiles").select("id, name, email, role").eq("id", data.user.id).maybeSingle();
+    profile = res?.data || null;
+  }
+
+  const remainingMs = payload?.exp ? Math.max(1000, (payload.exp - nowSec) * 1000) : AUTH_CACHE_MS;
+  cache.set(tokenKey, { authUser: data.user, profile }, Math.min(AUTH_CACHE_MS, remainingMs));
+
+  return { authUser: data.user, profile, session };
 };
 
 /**
@@ -13,23 +74,7 @@ const readBearerToken = (req) => {
  * and req.db = a Supabase client that runs queries as that user (RLS applies).
  */
 const resolveUser = async (req, token) => {
-  // Verify the JWT with Supabase and check our session row in parallel.
-  const [{ data, error }, session] = await Promise.all([serviceDb.auth.getUser(token), SessionService.resolveActive(token)]);
-  if (error || !data?.user) {
-    throw ApiError.unauthorized("Your session has expired. Please sign in again.", { code: "ACCESS_TOKEN_EXPIRED" });
-  }
-  // Signed out on this or another device (or never issued by this API): reject now,
-  // rather than letting the access token live until it expires.
-  if (!session || session.userId !== data.user.id) {
-    throw ApiError.unauthorized("This session was signed out. Please sign in again.", { code: "SESSION_REVOKED" });
-  }
-
-  const authUser = data.user;
-  const { data: profile } = await serviceDb
-    .from("profiles")
-    .select("id, name, email, role")
-    .eq("id", authUser.id)
-    .maybeSingle();
+  const { authUser, profile, session } = await resolveTokenIdentity(token);
 
   req.auth = { token, user: authUser, sessionId: session.sessionId };
   req.user = {

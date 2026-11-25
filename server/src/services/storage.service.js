@@ -1,6 +1,8 @@
 import { unwrap } from "../utils/ApiError.js";
+import { cache } from "../utils/cache.js";
 
 export const BUCKETS = { AVATARS: "avatars", RESUMES: "resumes", DOCUMENTS: "documents" };
+const SIGNED_URL_CACHE_MS = 45 * 60 * 1000; // 45m cache for 60m signed URLs
 
 /** Picks the storage bucket for a document type. */
 export const bucketForDocumentType = (documentType) => {
@@ -50,7 +52,7 @@ export const StorageService = {
     return { bucket, path, publicUrl };
   },
 
-  /** Returns a URL the browser can open: public for avatars, 1-hour signed URL otherwise. */
+  /** Returns a URL the browser can open: public for avatars, 1-hour signed URL otherwise (cached 45m). */
   async resolveUrl(db, bucket, stored, expiresIn = 3600) {
     if (!stored) return "";
     const target = normalizeBucketName(bucket);
@@ -60,14 +62,19 @@ export const StorageService = {
     if (target === BUCKETS.AVATARS) {
       return db.storage.from(target).getPublicUrl(path).data?.publicUrl || "";
     }
-    const { data, error } = await db.storage.from(target).createSignedUrl(path, expiresIn);
-    if (error) return "";
-    return data?.signedUrl || "";
+    const cacheKey = `signed:${target}:${path}`;
+    return cache.remember(cacheKey, Math.min(SIGNED_URL_CACHE_MS, Math.max(60_000, (expiresIn - 120) * 1000)), async () => {
+      const { data, error } = await db.storage.from(target).createSignedUrl(path, expiresIn);
+      if (error) return "";
+      return data?.signedUrl || "";
+    });
   },
 
   async remove(db, bucket, stored) {
+    const target = normalizeBucketName(bucket);
     const path = extractStoragePath(stored);
     if (!path) return;
-    await db.storage.from(normalizeBucketName(bucket)).remove([path]);
+    cache.del(`signed:${target}:${path}`);
+    await db.storage.from(target).remove([path]);
   },
 };

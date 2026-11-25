@@ -8,6 +8,11 @@ import { VacancyModel } from "../models/vacancy.model.js";
 import { SettingModel, PaymentLinkModel, FormFieldModel, InquiryModel } from "../models/cms.model.js";
 import { config } from "../config/env.js";
 import { EmailService } from "../services/email/email.service.js";
+import { cache } from "../utils/cache.js";
+
+const setPublicCache = (res, seconds = 15) => {
+  res.set("Cache-Control", `public, max-age=${seconds}, stale-while-revalidate=${seconds * 2}`);
+};
 
 export const PublicController = {
   health: (req, res) => {
@@ -16,29 +21,46 @@ export const PublicController = {
 
   /** Live platform counters shown on the landing page. */
   stats: asyncHandler(async (req, res) => {
-    const [teachers, institutes, vacancies] = await Promise.all([
-      TeacherModel.countPublic(serviceDb),
-      InstituteModel.countPublic(serviceDb),
-      VacancyModel.countActive(serviceDb),
-    ]);
-    res.json({ success: true, data: { teachers, institutes, vacancies } });
+    const data = await cache.remember("public:stats", 30_000, async () => {
+      const [teachers, institutes, vacancies] = await Promise.all([
+        TeacherModel.countPublic(serviceDb),
+        InstituteModel.countPublic(serviceDb),
+        VacancyModel.countActive(serviceDb),
+      ]);
+      return { teachers, institutes, vacancies };
+    });
+    setPublicCache(res, 15);
+    res.json({ success: true, data });
   }),
 
   settings: asyncHandler(async (req, res) => {
-    res.json({ success: true, data: await SettingModel.getMap(anonDb) });
+    const data = await cache.remember("public:settings:map", 30_000, () => SettingModel.getMap(anonDb));
+    setPublicCache(res, 15);
+    res.json({ success: true, data });
   }),
 
   paymentLinks: asyncHandler(async (req, res) => {
-    res.json({ success: true, data: await PaymentLinkModel.listActive(anonDb) });
+    const data = await cache.remember("public:payment-links", 60_000, () => PaymentLinkModel.listActive(anonDb));
+    setPublicCache(res, 30);
+    res.json({ success: true, data });
   }),
 
   formFields: asyncHandler(async (req, res) => {
-    const fields = await FormFieldModel.listByType(anonDb, req.query.type);
-    res.json({ success: true, data: fields });
+    const type = req.query.type || "all";
+    const data = await cache.remember(`public:form-fields:${type}`, 60_000, () =>
+      FormFieldModel.listByType(anonDb, req.query.type)
+    );
+    setPublicCache(res, 30);
+    res.json({ success: true, data });
   }),
 
   featuredInstitutes: asyncHandler(async (req, res) => {
-    res.json({ success: true, data: await InstituteModel.listPublic(anonDb, { featured: req.query.featured }) });
+    const featured = req.query.featured ?? "all";
+    const data = await cache.remember(`public:institutes:${featured}`, 30_000, () =>
+      InstituteModel.listPublic(anonDb, { featured: req.query.featured })
+    );
+    setPublicCache(res, 15);
+    res.json({ success: true, data });
   }),
 
   contact: asyncHandler(async (req, res) => {

@@ -7,6 +7,7 @@ import { AuthService } from "../services/auth.service.js";
 import { SessionService } from "../services/session.service.js";
 import { EmailService } from "../services/email/email.service.js";
 import { serviceDb } from "../config/supabase.js";
+import { invalidateAuthToken } from "../middlewares/auth.js";
 
 const assertPassword = (password) => {
   if (!password || String(password).length < 6) {
@@ -111,6 +112,7 @@ export const AuthController = {
 
   /** Ends this device's session. Works even if the access token already expired. */
   logout: asyncHandler(async (req, res) => {
+    invalidateAuthToken(req.auth?.token);
     // Best effort: the user must always end up signed out locally, even if the
     // database is briefly unreachable (the row then simply expires).
     try {

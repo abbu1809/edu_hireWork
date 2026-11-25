@@ -13,6 +13,8 @@ if (missing.length > 0) {
 const { default: app } = await import("./src/app.js");
 
 const server = app.listen(config.port, () => {
+  server.keepAliveTimeout = 65000;
+  server.headersTimeout = 66000;
   console.log(`[FacultyKart API] Listening on http://localhost:${config.port} (${config.nodeEnv})`);
   console.log(`[FacultyKart API] Allowed client origins: ${config.clientUrls.join(", ")}`);
   if (!isRazorpayConfigured()) {

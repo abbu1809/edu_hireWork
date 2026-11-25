@@ -1,31 +1,30 @@
-import { anonDb, serviceDb } from "../config/supabase.js";
-import { ProfileModel } from "../models/profile.model.js";
+import { serviceDb } from "../config/supabase.js";
 import { SettingModel } from "../models/cms.model.js";
+import { cache } from "../utils/cache.js";
+import { resolveTokenIdentity } from "./auth.js";
 
-const CACHE_TTL_MS = 15 * 1000;
-let cached = { loadedAt: 0, mode: false, message: "" };
+const CACHE_TTL_MS = 30 * 1000;
+const SETTINGS_CACHE_KEY = "public:settings:map";
 
 /** Clears the cached maintenance state so admin toggles take effect immediately. */
 export const clearMaintenanceCache = () => {
-  cached = { loadedAt: 0, mode: false, message: "" };
+  cache.del(SETTINGS_CACHE_KEY);
 };
 
 const getMaintenanceState = async () => {
-  if (Date.now() - cached.loadedAt < CACHE_TTL_MS) return cached;
   try {
-    const map = await SettingModel.getMap(serviceDb);
+    const map = await cache.remember(SETTINGS_CACHE_KEY, CACHE_TTL_MS, () => SettingModel.getMap(serviceDb));
     const rawMode = map?.maintenance_mode;
     const mode = rawMode === true || rawMode === "true";
     const message =
       typeof map?.maintenance_message === "string" && map.maintenance_message.trim()
         ? map.maintenance_message.trim()
         : "FacultyKart is currently undergoing scheduled maintenance. Please check back shortly.";
-    cached = { loadedAt: Date.now(), mode, message };
+    return { mode, message };
   } catch {
     // Fail open if settings table is unreachable so the site doesn't lock out unexpectedly.
-    cached = { loadedAt: Date.now(), mode: false, message: "" };
+    return { mode: false, message: "" };
   }
-  return cached;
 };
 
 // Routes that remain reachable during maintenance (health checks, settings lookup, login, admin panel).
@@ -36,9 +35,7 @@ const isAdminRequest = async (req) => {
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : null;
   if (!token) return false;
   try {
-    const { data, error } = await anonDb.auth.getUser(token);
-    if (error || !data?.user) return false;
-    const profile = await ProfileModel.findById(serviceDb, data.user.id);
+    const { profile } = await resolveTokenIdentity(token);
     return profile?.role?.toLowerCase() === "admin";
   } catch {
     return false;
