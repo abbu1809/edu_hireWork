@@ -18,7 +18,7 @@ app.use(
     origin: (origin, callback) => {
       // Allow same-origin tools (curl, health checks) and the configured client origins.
       if (!origin || config.clientUrls.includes(origin.replace(/\/$/, ""))) return callback(null, true);
-      callback(new Error(`Origin ${origin} is not allowed by CORS.`));
+      return callback(null, false);
     },
     credentials: true,
   })

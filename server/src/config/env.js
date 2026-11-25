@@ -8,10 +8,26 @@ const list = (value, fallback) =>
     .map((item) => item.trim().replace(/\/$/, ""))
     .filter(Boolean);
 
+// Automatically allow both apex and www. variants for any configured domain.
+const expandWww = (urls) => {
+  const out = new Set();
+  for (const url of urls) {
+    out.add(url);
+    try {
+      const u = new URL(url);
+      if (u.hostname !== "localhost" && !/^\d+\.\d+\.\d+\.\d+$/.test(u.hostname)) {
+        const altHost = u.hostname.startsWith("www.") ? u.hostname.slice(4) : `www.${u.hostname}`;
+        out.add(`${u.protocol}//${altHost}${u.port ? `:${u.port}` : ""}`);
+      }
+    } catch {}
+  }
+  return [...out];
+};
+
 export const config = {
   port: Number(process.env.PORT) || 5000,
   nodeEnv: process.env.NODE_ENV || "development",
-  clientUrls: list(process.env.CLIENT_URL, "https://facultykart.in,http://localhost:3000"),
+  clientUrls: expandWww(list(process.env.CLIENT_URL, "https://facultykart.in,http://localhost:3000")),
 
   supabase: {
     url: (process.env.SUPABASE_URL || "").trim(),
