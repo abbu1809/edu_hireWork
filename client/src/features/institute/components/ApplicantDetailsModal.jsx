@@ -117,7 +117,7 @@ export default function ApplicantDetailsModal({
         )}
 
         {/* Demo Video Link if available */}
-        {teacher.demo_lecture_url && (
+        {(teacher.demo_video_url || teacher.demo_lecture_url) && (
           <div style={{ background: "var(--surface-sunken, #f8fafc)", padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <Video size={18} color="var(--primary-color)" />
@@ -127,7 +127,7 @@ export default function ApplicantDetailsModal({
               </div>
             </div>
             <a
-              href={teacher.demo_lecture_url}
+              href={teacher.demo_video_url || teacher.demo_lecture_url}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-outline btn-sm"

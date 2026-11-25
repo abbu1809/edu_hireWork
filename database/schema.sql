@@ -738,9 +738,10 @@ BEGIN
   IF v_norm_email IN ('facultykart@gmail.com', 'admin@facultykart.in') THEN
     v_role := 'ADMIN';
   ELSE
-    v_role := UPPER(COALESCE(NEW.raw_user_meta_data->>'role', 'TEACHER'));
-    IF v_role NOT IN ('TEACHER', 'INSTITUTE') THEN
-      v_role := 'TEACHER';
+    v_role := UPPER(NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'role', '')), ''));
+    -- OAuth signups carry no role: the API creates the profile once the user chooses one.
+    IF v_role IS NULL OR v_role NOT IN ('TEACHER', 'INSTITUTE') THEN
+      RETURN NEW;
     END IF;
   END IF;
 

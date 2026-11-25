@@ -37,7 +37,7 @@ export const ApplicationController = {
     if (teacherIds.length > 0) {
       const { data: teachers } = await req.db
         .from("teachers")
-        .select("id, name, email, phone, subjects, primary_subject, city, experience_years, qualification, bio, headline, demo_lecture_url, resume_url, profile_photo_url, verified")
+        .select("id, name, email, phone, subjects, primary_subject, city, experience_years, qualification, bio, headline, demo_video_url, resume_url, profile_photo_url, verified")
         .in("id", teacherIds);
       if (teachers) {
         teachersMap = Object.fromEntries(teachers.map((t) => [t.id, t]));

@@ -1,5 +1,5 @@
 -- ==============================================================================
--- EduHire Bridge — ONE-SHOT SETUP FOR A NEW (EMPTY) SUPABASE PROJECT
+-- FacultyKart — ONE-SHOT SETUP FOR A NEW (EMPTY) SUPABASE PROJECT
 -- ------------------------------------------------------------------------------
 -- Paste this whole file into Supabase → SQL Editor → New query → Run.
 -- It is the concatenation, in order, of:
@@ -7,9 +7,9 @@
 --   2. migrations/20260910_admin_manual_management_verification.sql (admin RPCs)
 --   3. migrations/20261004_server_api_architecture.sql    (signup trigger, inquiries, payments)
 --   4. migrations/20261005_email_services.sql             (OTP, subscribers, email logs)
---   5. migrations/20261005_admin_via_api_only.sql         (no hard-coded admin email)
+--   5. migrations/20261005_admin_via_api_only.sql         (OAuth-safe signup trigger)
 --   6. migrations/20261006_user_sessions.sql              (refresh-token sessions)
--- Generated file — edit the sources above, not this file.
+--   7. migrations/20261124_faculty_registration_fee_and_admin.sql (₹9 fee + facultykart@gmail.com admin)
 -- Already set up an older database? Run only the migrations you're missing instead.
 -- ==============================================================================
 
@@ -1561,7 +1561,7 @@ CREATE TABLE IF NOT EXISTS public.blog_posts (
   category TEXT NOT NULL DEFAULT 'Career Guidance',
   tags TEXT[] NOT NULL DEFAULT '{}',
   author_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-  author_name TEXT NOT NULL DEFAULT 'EduHire Editorial Board',
+  author_name TEXT NOT NULL DEFAULT 'FacultyKart Editorial Board',
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'scheduled', 'archived')),
   featured BOOLEAN NOT NULL DEFAULT FALSE,
   views_count INTEGER NOT NULL DEFAULT 0,
@@ -2080,7 +2080,7 @@ BEGIN
   SELECT email INTO v_admin_email FROM public.profiles WHERE id = v_admin_id;
 
   v_name := COALESCE(p_data->>'name', 'Educator Profile');
-  v_email := public.normalize_email(COALESCE(p_data->>'email', 'teacher_' || substring(v_new_id::text, 1, 8) || '@eduhire.manual'));
+  v_email := public.normalize_email(COALESCE(p_data->>'email', 'teacher_' || substring(v_new_id::text, 1, 8) || '@facultykart.manual'));
   v_phone := public.normalize_phone(p_data->>'phone');
 
   -- 1. Insert into public.profiles
@@ -2254,7 +2254,7 @@ BEGIN
   SELECT email INTO v_admin_email FROM public.profiles WHERE id = v_admin_id;
 
   v_name := COALESCE(p_data->>'institute_name', 'Institute Profile');
-  v_email := public.normalize_email(COALESCE(p_data->>'email', 'inst_' || substring(v_new_id::text, 1, 8) || '@eduhire.manual'));
+  v_email := public.normalize_email(COALESCE(p_data->>'email', 'inst_' || substring(v_new_id::text, 1, 8) || '@facultykart.manual'));
   v_phone := public.normalize_phone(p_data->>'phone');
 
   -- 1. Insert into public.profiles
@@ -3054,5 +3054,128 @@ REVOKE ALL ON FUNCTION public.purge_old_sessions() FROM PUBLIC, anon, authentica
 
 NOTIFY pgrst, 'reload schema';
 
+
+-- ##############################################################################
+-- ## migrations/20261124_faculty_registration_fee_and_admin.sql
+-- ##############################################################################
+
+-- 1. Add platform fee columns to teachers
+ALTER TABLE public.teachers
+  ADD COLUMN IF NOT EXISTS is_platform_fee_paid BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS platform_fee_paid_at TIMESTAMPTZ;
+
+-- 2. Ensure handle_new_user() auto-assigns ADMIN for facultykart@gmail.com
+--    while keeping Google OAuth signups role-free until /auth/callback chooses a role.
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth, pg_temp
+AS $$
+DECLARE
+  v_role TEXT;
+  v_name TEXT;
+  v_phone TEXT;
+  v_city TEXT;
+  v_subjects TEXT[];
+  v_norm_email TEXT;
+  v_norm_phone TEXT;
+  v_duplicate_found BOOLEAN := FALSE;
+BEGIN
+  v_norm_email := public.normalize_email(NEW.email);
+  v_norm_phone := public.normalize_phone(NEW.raw_user_meta_data->>'phone');
+
+  IF v_norm_email IN ('facultykart@gmail.com', 'admin@facultykart.in') THEN
+    v_role := 'ADMIN';
+  ELSE
+    v_role := UPPER(NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'role', '')), ''));
+    -- OAuth signups carry no role: the API creates the profile once the user chooses one.
+    IF v_role IS NULL OR v_role NOT IN ('TEACHER', 'INSTITUTE') THEN
+      RETURN NEW;
+    END IF;
+  END IF;
+
+  IF v_norm_phone IS NOT NULL THEN
+    SELECT EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE public.normalize_phone(phone) = v_norm_phone
+        AND id != NEW.id
+    ) INTO v_duplicate_found;
+
+    IF v_duplicate_found THEN
+      RAISE EXCEPTION 'DUPLICATE_ACCOUNT: An account already exists with these details. Please log in instead.';
+    END IF;
+  END IF;
+
+  v_name := NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'name', NEW.raw_user_meta_data->>'full_name', '')), '');
+  IF v_name IS NULL THEN
+    v_name := split_part(NEW.email, '@', 1);
+  END IF;
+
+  v_phone := v_norm_phone;
+  v_city := NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'city', '')), '');
+
+  INSERT INTO public.profiles (id, name, email, role, phone, city)
+  VALUES (NEW.id, v_name, v_norm_email, v_role, v_phone, v_city)
+  ON CONFLICT (id) DO UPDATE
+  SET
+    role = CASE WHEN v_norm_email IN ('facultykart@gmail.com', 'admin@facultykart.in') THEN 'ADMIN' ELSE public.profiles.role END,
+    name = EXCLUDED.name,
+    email = EXCLUDED.email,
+    phone = COALESCE(EXCLUDED.phone, public.profiles.phone),
+    city = COALESCE(EXCLUDED.city, public.profiles.city),
+    updated_at = NOW();
+
+  IF v_role = 'TEACHER' THEN
+    IF NEW.raw_user_meta_data->'subjects' IS NOT NULL AND jsonb_typeof(NEW.raw_user_meta_data->'subjects') = 'array' THEN
+      SELECT COALESCE(array_agg(x::text), '{}'::TEXT[]) INTO v_subjects
+      FROM jsonb_array_elements_text(NEW.raw_user_meta_data->'subjects') AS x;
+    ELSIF NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'subject', '')), '') IS NOT NULL THEN
+      v_subjects := ARRAY[TRIM(NEW.raw_user_meta_data->>'subject')];
+    ELSE
+      v_subjects := '{}'::TEXT[];
+    END IF;
+
+    INSERT INTO public.teachers (
+      id, name, email, phone, subjects, primary_subject, city, preferred_location,
+      profile_status, kyc_status, verified, premium_badge
+    )
+    VALUES (
+      NEW.id, v_name, v_norm_email, v_phone, v_subjects,
+      NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'subject', '')), ''),
+      v_city, v_city, 'Active', 'Pending', FALSE, FALSE
+    )
+    ON CONFLICT (id) DO UPDATE
+    SET
+      name = EXCLUDED.name,
+      email = EXCLUDED.email,
+      phone = COALESCE(EXCLUDED.phone, public.teachers.phone),
+      updated_at = NOW();
+
+  ELSIF v_role = 'INSTITUTE' THEN
+    INSERT INTO public.institutes (
+      id, institute_name, email, phone, city, institute_type, verification_status, verified, plan
+    )
+    VALUES (
+      NEW.id, v_name, v_norm_email, v_phone, v_city,
+      NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'institute_type', '')), ''),
+      'Pending', FALSE, 'Standard'
+    )
+    ON CONFLICT (id) DO UPDATE
+    SET
+      institute_name = EXCLUDED.institute_name,
+      email = EXCLUDED.email,
+      phone = COALESCE(EXCLUDED.phone, public.institutes.phone),
+      updated_at = NOW();
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+-- 3. Default platform settings for FacultyKart
+INSERT INTO public.platform_settings (key, value)
+VALUES ('contact_email', '"contact@facultykart.in"'::jsonb)
+ON CONFLICT (key) DO NOTHING;
 
 NOTIFY pgrst, 'reload schema';
