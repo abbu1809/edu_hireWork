@@ -46,6 +46,7 @@ export const useBroadcast = () => useAdminMutation(adminApi.broadcast);
 export const useCreatePost = () => useAdminMutation(adminApi.createPost, [["blog"]]);
 export const useDeletePost = () => useAdminMutation(adminApi.deletePost, [["blog"]]);
 export const useUpdateInquiry = () => useAdminMutation(adminApi.updateInquiry);
+export const useUpdateSetting = () => useAdminMutation(adminApi.updateSetting, [queryKeys.settings]);
 
 // ---- Email center ----
 export const useEmailStatus = () => useQuery({ queryKey: ["admin", "email", "status"], queryFn: adminApi.emailStatus, staleTime: 60 * 1000 });

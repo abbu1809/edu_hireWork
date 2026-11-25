@@ -11,8 +11,11 @@ import notificationRoutes from "./notification.routes.js";
 import paymentRoutes from "./payment.routes.js";
 import blogRoutes from "./blog.routes.js";
 import adminRoutes from "./admin.routes.js";
+import { maintenanceGuard } from "../middlewares/maintenance.js";
 
 const router = Router();
+
+router.use(maintenanceGuard);
 
 router.use("/", publicRoutes);
 router.use("/auth", authRoutes);

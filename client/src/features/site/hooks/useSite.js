@@ -7,7 +7,7 @@ export const usePlatformSettings = () =>
   useQuery({
     queryKey: queryKeys.settings,
     queryFn: siteApi.settings,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
   });
 
 /** Live counters for the landing page. */

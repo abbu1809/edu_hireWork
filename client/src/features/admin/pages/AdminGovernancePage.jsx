@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Send, Inbox, ScrollText } from "lucide-react";
-import { useAdminAuditLogs, useAdminInquiries, useBroadcast, useUpdateInquiry } from "../hooks/useAdmin";
+import { useEffect, useState } from "react";
+import { Send, Inbox, ScrollText, Wrench, Power } from "lucide-react";
+import { useAdminAuditLogs, useAdminInquiries, useBroadcast, useUpdateInquiry, useUpdateSetting } from "../hooks/useAdmin";
+import { usePlatformSettings } from "@/features/site/hooks/useSite";
 import { DashboardHeader } from "@/shared/components/layout/DashboardLayout";
 import EmptyState from "@/shared/components/EmptyState";
 import QueryState from "@/shared/components/QueryState";
@@ -17,6 +18,47 @@ export default function AdminGovernancePage() {
   const inquiriesQuery = useAdminInquiries();
   const auditQuery = useAdminAuditLogs();
   const updateInquiry = useUpdateInquiry();
+  const { data: settings } = usePlatformSettings();
+  const updateSetting = useUpdateSetting();
+
+  const isMaintenance = settings?.maintenance_mode === true || settings?.maintenance_mode === "true";
+  const [maintenanceMsg, setMaintenanceMsg] = useState("");
+
+  useEffect(() => {
+    if (typeof settings?.maintenance_message === "string") {
+      setMaintenanceMsg(settings.maintenance_message);
+    }
+  }, [settings?.maintenance_message]);
+
+  const handleToggleMaintenance = () => {
+    const next = !isMaintenance;
+    updateSetting.mutate(
+      {
+        key: "maintenance_mode",
+        value: next,
+        description: "When true, only admins can access the platform",
+      },
+      {
+        onSuccess: () => notify.success(next ? "Maintenance Mode enabled. Only admins can access the site." : "Maintenance Mode disabled. Site is now live for everyone."),
+        onError: (error) => notify.apiError(error, "Could not update maintenance mode."),
+      }
+    );
+  };
+
+  const handleSaveMaintenanceMessage = (e) => {
+    e.preventDefault();
+    updateSetting.mutate(
+      {
+        key: "maintenance_message",
+        value: maintenanceMsg.trim() || "FacultyKart is currently undergoing scheduled maintenance. We will be back shortly.",
+        description: "Message shown to visitors during maintenance",
+      },
+      {
+        onSuccess: () => notify.success("Maintenance message updated."),
+        onError: (error) => notify.apiError(error, "Could not update maintenance message."),
+      }
+    );
+  };
 
   const [target, setTarget] = useState("TEACHER");
   const [title, setTitle] = useState("");
@@ -43,7 +85,62 @@ export default function AdminGovernancePage() {
 
   return (
     <div>
-      <DashboardHeader title="Platform Governance & Mass Broadcast" subtitle="Send system announcements, answer inquiries and review audit logs" />
+      <DashboardHeader title="Platform Governance & Mass Broadcast" subtitle="Manage maintenance mode, send system announcements, answer inquiries and review audit logs" />
+
+      {/* Maintenance Mode Card (Admin-only control) */}
+      <div
+        className="card"
+        style={{
+          marginBottom: "2rem",
+          borderLeft: `4px solid ${isMaintenance ? "#dc2626" : "var(--color-brand-accent)"}`,
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem", marginBottom: "1rem" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+              <Wrench size={20} color={isMaintenance ? "#dc2626" : "var(--color-brand-house)"} />
+              <h3 className="card-title" style={{ margin: 0 }}>
+                Maintenance Mode
+              </h3>
+              <span className={`badge ${isMaintenance ? "badge-rejected" : "badge-verified"}`}>
+                {isMaintenance ? "MAINTENANCE ACTIVE" : "SITE LIVE"}
+              </span>
+            </div>
+            <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", marginTop: "0.35rem" }}>
+              When enabled, visitors, teachers, and institutes see the maintenance screen and API requests are paused. Administrators retain full access to the entire platform.
+            </p>
+          </div>
+          <button
+            type="button"
+            className={`btn ${isMaintenance ? "btn-primary" : "btn-danger-outline"}`}
+            onClick={handleToggleMaintenance}
+            disabled={updateSetting.isPending}
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+          >
+            <Power size={16} />
+            {updateSetting.isPending ? "Updating..." : isMaintenance ? "Disable Maintenance Mode" : "Enable Maintenance Mode"}
+          </button>
+        </div>
+
+        <form onSubmit={handleSaveMaintenanceMessage} style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div style={{ flex: "1 1 320px" }}>
+            <label className="form-label" htmlFor="maint-msg">
+              Visitor Maintenance Message
+            </label>
+            <input
+              id="maint-msg"
+              type="text"
+              className="input-field"
+              placeholder="FacultyKart is currently undergoing scheduled maintenance. We will be back shortly."
+              value={maintenanceMsg}
+              onChange={(e) => setMaintenanceMsg(e.target.value)}
+            />
+          </div>
+          <button type="submit" className="btn btn-outline" disabled={updateSetting.isPending}>
+            Save Message
+          </button>
+        </form>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2" style={{ marginBottom: "2rem" }}>
         <div className="card">

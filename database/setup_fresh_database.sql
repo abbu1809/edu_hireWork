@@ -3174,8 +3174,11 @@ END;
 $$;
 
 -- 3. Default platform settings for FacultyKart
-INSERT INTO public.platform_settings (key, value)
-VALUES ('contact_email', '"contact@facultykart.in"'::jsonb)
+INSERT INTO public.platform_settings (key, value, description)
+VALUES
+  ('contact_email', '"contact@facultykart.in"'::jsonb, 'Primary platform contact email'),
+  ('maintenance_mode', 'false'::jsonb, 'When true, only admins can access the platform'),
+  ('maintenance_message', '"FacultyKart is currently undergoing scheduled maintenance. We will be back shortly."'::jsonb, 'Message shown to visitors during maintenance')
 ON CONFLICT (key) DO NOTHING;
 
 NOTIFY pgrst, 'reload schema';

@@ -19,6 +19,7 @@ import {
 } from "../models/cms.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { EmailService } from "../services/email/email.service.js";
+import { clearMaintenanceCache } from "../middlewares/maintenance.js";
 
 const ENTITY = { teachers: "TEACHER", institutes: "INSTITUTE" };
 const VERIFICATION_STATUSES = ["Pending", "Under Review", "Verified", "Rejected", "Suspended"];
@@ -360,6 +361,16 @@ export const AdminController = {
   updateSetting: asyncHandler(async (req, res) => {
     if (req.body.value === undefined) throw ApiError.badRequest("Missing setting value.");
     const row = await SettingModel.upsert(req.db, req.params.key, req.body.value, req.body.description || "");
+    if (req.params.key === "maintenance_mode" || req.params.key === "maintenance_message") {
+      clearMaintenanceCache();
+      await AdminActionModel.log(req.db, {
+        adminId: req.user.id,
+        actionType: "UPDATE_SETTING",
+        targetId: req.params.key,
+        targetType: "SYSTEM",
+        details: { value: req.body.value },
+      });
+    }
     res.json({ success: true, data: row });
   }),
 

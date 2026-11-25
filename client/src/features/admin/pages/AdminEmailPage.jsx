@@ -216,7 +216,7 @@ function EmailPreview({ subject, message, ctaLabel }) {
       <div style={{ background: "#fff", padding: "1.1rem 1rem", borderRadius: "0 0 10px 10px" }}>
         <div style={{ color: "var(--color-brand-green)", fontWeight: 700, fontSize: "1.1rem", marginBottom: "0.75rem" }}>{subject || "Your subject line"}</div>
         <p style={{ whiteSpace: "pre-line", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "0.9rem" }}>
-          Hi Riya,
+          Hi [Recipient Name],
           {"\n\n"}
           {message || "Your message will appear here."}
         </p>

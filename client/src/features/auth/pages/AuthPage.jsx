@@ -46,6 +46,7 @@ export default function AuthPage({ forcedMode }) {
   const [recoveryToken, setRecoveryToken] = useState(null);
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [forgotNotFound, setForgotNotFound] = useState(false);
   // Sign-up email verification: { email, resendInSeconds } while the code step is shown.
   const [otpStage, setOtpStage] = useState(null);
   const [verifying, setVerifying] = useState(false);
@@ -264,6 +265,7 @@ export default function AuthPage({ forcedMode }) {
     setBusy(true);
     try {
       if (authMode === "forgot") {
+        setForgotNotFound(false);
         await authApi.forgotPassword(email.trim());
         notify.success("Password reset link sent to your registered email.");
       } else {
@@ -274,6 +276,9 @@ export default function AuthPage({ forcedMode }) {
         navigate("/auth?mode=login", { replace: true });
       }
     } catch (error) {
+      if (authMode === "forgot" && (error?.response?.status === 404 || error?.response?.data?.details?.code === "USER_NOT_FOUND")) {
+        setForgotNotFound(true);
+      }
       notify.error(getErrorMessage(error));
     } finally {
       setBusy(false);
@@ -504,6 +509,38 @@ export default function AuthPage({ forcedMode }) {
                 {authMode === "signup" ? "Confirm Password" : "Confirm New Password"}
               </label>
               <PasswordInput id="auth-confirm" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" />
+            </div>
+          )}
+
+          {authMode === "forgot" && forgotNotFound && (
+            <div
+              role="alert"
+              style={{
+                background: "rgba(220, 38, 38, 0.08)",
+                border: "1px solid rgba(220, 38, 38, 0.25)",
+                borderRadius: "8px",
+                padding: "0.85rem 1rem",
+                marginTop: "0.75rem",
+                fontSize: "0.86rem",
+                color: "#991b1b",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "0.5rem",
+              }}
+            >
+              <span>No account found for <strong>{email}</strong>.</span>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  setForgotNotFound(false);
+                  navigate("/auth?mode=signup");
+                }}
+              >
+                Sign Up Now
+              </button>
             </div>
           )}
 

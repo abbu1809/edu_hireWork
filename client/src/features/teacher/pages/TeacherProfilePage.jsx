@@ -29,6 +29,8 @@ const toForm = (user) => ({
   primary_subject: user?.primary_subject || user?.subjects?.[0] || "",
   qualification: user?.qualification || "",
   experience_years: user?.experience_years ?? "",
+  current_organization: user?.current_organization || "",
+  current_designation: user?.current_designation || "",
   city: user?.city || "",
   headline: user?.headline || "",
   expected_ctc: user?.expected_ctc || "",
@@ -214,6 +216,35 @@ export default function TeacherProfilePage() {
                   className="input-field"
                   value={profileForm.experience_years}
                   onChange={set("experience_years")}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+              <div className="form-group">
+                <label className="form-label" htmlFor="tp-org">
+                  Current / Last Organization
+                </label>
+                <input
+                  id="tp-org"
+                  type="text"
+                  className="input-field"
+                  placeholder="e.g. Allen Career Institute, Kota"
+                  value={profileForm.current_organization}
+                  onChange={set("current_organization")}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="tp-desig">
+                  Current / Last Designation
+                </label>
+                <input
+                  id="tp-desig"
+                  type="text"
+                  className="input-field"
+                  placeholder="e.g. Senior Physics Faculty"
+                  value={profileForm.current_designation}
+                  onChange={set("current_designation")}
                 />
               </div>
             </div>

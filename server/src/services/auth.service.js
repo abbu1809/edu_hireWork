@@ -307,7 +307,19 @@ export const AuthService = {
   },
 
   async sendPasswordReset(email) {
-    const { error } = await createAnonClient().auth.resetPasswordForEmail(normalizeEmail(email), {
+    const normEmail = normalizeEmail(email);
+    const { data: existing } = await serviceDb.rpc("check_account_exists", {
+      p_email: normEmail,
+      p_phone: null,
+      p_exclude_user_id: null,
+    });
+    if (!existing?.exists) {
+      throw ApiError.notFound("No account found with this email address. Please sign up to create an account.", {
+        code: "USER_NOT_FOUND",
+      });
+    }
+
+    const { error } = await createAnonClient().auth.resetPasswordForEmail(normEmail, {
       redirectTo: `${config.clientUrl}/auth/reset-password`,
     });
     if (error) throw ApiError.badRequest(error.message || "Password reset failed.");

@@ -35,5 +35,6 @@ export const adminApi = {
 
   inquiries: () => unwrap(http.get("/admin/inquiries")),
   updateInquiry: ({ id, status }) => unwrap(http.patch(`/admin/inquiries/${id}`, { status })),
+  updateSetting: ({ key, value, description }) => unwrap(http.put(`/admin/settings/${key}`, { value, description })),
   auditLogs: () => unwrap(http.get("/admin/audit-logs")),
 };

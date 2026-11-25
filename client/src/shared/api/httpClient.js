@@ -1,7 +1,12 @@
 import axios from "axios";
 import { tokenStorage } from "./tokenStorage";
 
-const baseURL = import.meta.env.VITE_API_URL || "/api";
+// Use same-origin /api proxy on facultykart.in (Vercel rewrite) so httpOnly
+// refresh cookies stay first-party and are never blocked by browser 3rd-party cookie rules.
+const isFirstPartyProxy =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "facultykart.in" || window.location.hostname.endsWith(".facultykart.in"));
+const baseURL = isFirstPartyProxy ? "/api" : import.meta.env.VITE_API_URL || "/api";
 
 /**
  * Every request from the UI goes through this instance.
