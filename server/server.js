@@ -30,7 +30,7 @@ const server = app.listen(config.port, () => {
       return;
     }
     const check = await verifyMailTransport();
-    console.log(check.ok ? "[FacultyKart API] SMTP connection verified — email is live." : `[FacultyKart API] SMTP check failed: ${check.error}`);
+    console.log(check.ok ? "[FacultyKart API] SMTP connection verified — email is live." : `[FacultyKart API] SMTP login failed: ${check.error}`);
   });
 });
 
