@@ -1,14 +1,18 @@
 import nodemailer from "nodemailer";
-import { config, isEmailConfigured } from "./env.js";
+import { config, isEmailConfigured, isGmailApiConfigured } from "./env.js";
+import { createGmailApiTransport } from "./gmailApiTransport.js";
 
 /**
  * Nodemailer transport.
+ * - Gmail API set    → same Gmail account, delivered over HTTPS (works where SMTP ports are blocked).
  * - SMTP configured  → pooled SMTP connection (Gmail, Zoho, SES, Brevo, Mailgun...).
  * - Not configured   → "log" transport: in development each email is printed to
  *   the server console (so OTP codes can still be tested); in production emails
  *   are skipped and recorded as SKIPPED.
  */
-export const mailTransport = isEmailConfigured()
+export const mailTransport = isGmailApiConfigured()
+  ? nodemailer.createTransport(createGmailApiTransport(config.email.gmail))
+  : isEmailConfigured()
   ? nodemailer.createTransport({
       host: config.email.host,
       port: config.email.port,

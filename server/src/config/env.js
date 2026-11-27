@@ -66,6 +66,12 @@ export const config = {
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : Number(process.env.SMTP_PORT) === 465,
     user: (process.env.SMTP_USER || "").trim(),
     pass: (process.env.SMTP_PASS || "").trim(),
+    // Gmail API over HTTPS: used instead of SMTP when set (Render's free plan blocks SMTP ports).
+    gmail: {
+      clientId: (process.env.GMAIL_CLIENT_ID || "").trim(),
+      clientSecret: (process.env.GMAIL_CLIENT_SECRET || "").trim(),
+      refreshToken: (process.env.GMAIL_REFRESH_TOKEN || "").trim(),
+    },
     fromEmail: (process.env.FROM_EMAIL || "no-reply@facultykart.in").trim(),
     fromName: (process.env.FROM_NAME || "FacultyKart").trim(),
     replyTo: (process.env.REPLY_TO_EMAIL || "support@facultykart.in").trim(),
@@ -97,4 +103,7 @@ export const missingRequiredEnv = () =>
 
 export const isRazorpayConfigured = () => Boolean(config.razorpay.keyId && config.razorpay.keySecret);
 
-export const isEmailConfigured = () => Boolean(config.email.host && config.email.user && config.email.pass);
+export const isGmailApiConfigured = () =>
+  Boolean(config.email.gmail.clientId && config.email.gmail.clientSecret && config.email.gmail.refreshToken);
+
+export const isEmailConfigured = () => isGmailApiConfigured() || Boolean(config.email.host && config.email.user && config.email.pass);
